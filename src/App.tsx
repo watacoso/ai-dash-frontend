@@ -5,19 +5,14 @@ import { RoleGuard } from './auth/RoleGuard'
 import { LoginPage } from './pages/LoginPage'
 import { AdminPage } from './pages/AdminPage'
 import { Nav } from './components/Nav'
-import { apiLogout } from './api/auth'
 
 function HomePage() {
-  const { token, logout } = useAuth()
-  async function handleLogout() {
-    if (token) await apiLogout(token)
-    logout()
-  }
+  const { logout } = useAuth()
   return (
     <>
       <Nav />
       <h1>AI-Dash</h1>
-      <button onClick={handleLogout}>Log out</button>
+      <button onClick={logout}>Log out</button>
     </>
   )
 }

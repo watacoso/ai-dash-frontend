@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { apiLogin } from '../api/auth'
 import { useAuth } from '../auth/AuthContext'
 
 export function LoginPage() {
@@ -16,8 +15,7 @@ export function LoginPage() {
     setError(null)
     setLoading(true)
     try {
-      const { access_token } = await apiLogin(email, password)
-      login(access_token)
+      await login(email, password)
       navigate('/')
     } catch {
       setError('Invalid email or password')

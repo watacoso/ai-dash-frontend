@@ -1,11 +1,19 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
+import { apiLogin, apiLogout, apiMe } from '../api/auth'
+
+export interface AuthUser {
+  id: string
+  email: string
+  role: string
+}
 
 export interface AuthContextValue {
-  token: string | null
+  user: AuthUser | null
   isAuthenticated: boolean
   role: string | null
-  login: (token: string) => void
-  logout: () => void
+  loading: boolean
+  login: (email: string, password: string) => Promise<void>
+  logout: () => Promise<void>
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null)
@@ -16,32 +24,37 @@ export function useAuth(): AuthContextValue {
   return ctx
 }
 
-function parseRole(token: string): string | null {
-  try {
-    const base64url = token.split('.')[1]
-    const base64 = base64url.replace(/-/g, '+').replace(/_/g, '/')
-    const payload = JSON.parse(atob(base64))
-    return typeof payload.role === 'string' ? payload.role : null
-  } catch {
-    return null
-  }
-}
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [token, setToken] = useState<string | null>(null)
-  const [role, setRole] = useState<string | null>(null)
+  const [user, setUser] = useState<AuthUser | null>(null)
+  const [loading, setLoading] = useState(true)
 
-  const login = (t: string) => {
-    setToken(t)
-    setRole(parseRole(t))
+  useEffect(() => {
+    apiMe().then((me) => {
+      setUser(me)
+      setLoading(false)
+    })
+  }, [])
+
+  const login = async (email: string, password: string) => {
+    await apiLogin(email, password)
+    const me = await apiMe()
+    setUser(me)
   }
-  const logout = () => {
-    setToken(null)
-    setRole(null)
+
+  const logout = async () => {
+    await apiLogout()
+    setUser(null)
   }
 
   return (
-    <AuthContext.Provider value={{ token, isAuthenticated: token !== null, role, login, logout }}>
+    <AuthContext.Provider value={{
+      user,
+      isAuthenticated: user !== null,
+      role: user?.role ?? null,
+      loading,
+      login,
+      logout,
+    }}>
       {children}
     </AuthContext.Provider>
   )

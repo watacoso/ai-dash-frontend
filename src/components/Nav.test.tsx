@@ -5,11 +5,12 @@ import { AuthContext, AuthContextValue } from '../auth/AuthContext'
 
 function renderNav(role: string | null) {
   const ctx: AuthContextValue = {
-    token: role ? 'fake-token' : null,
+    user: role ? { id: 'u1', email: 'a@b.com', role } : null,
     isAuthenticated: role !== null,
     role,
-    login: () => {},
-    logout: () => {},
+    loading: false,
+    login: async () => {},
+    logout: async () => {},
   }
   return render(
     <AuthContext.Provider value={ctx}>
