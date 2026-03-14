@@ -50,4 +50,26 @@ test.describe('Auth flows', () => {
     await page.goto('/')
     await expect(page).toHaveURL('/login')
   })
+
+  test('JWT is not accessible via document.cookie after login', async ({ page }) => {
+    await page.goto('/login')
+    await page.getByLabel(/email/i).fill('admin@example.com')
+    await page.getByLabel(/password/i).fill('adminpass123')
+    await page.getByRole('button', { name: /sign in/i }).click()
+    await expect(page).toHaveURL('/')
+    const cookies = await page.evaluate(() => document.cookie)
+    expect(cookies).not.toContain('access_token')
+  })
+
+  test('page reload after login preserves auth state', async ({ page }) => {
+    await page.goto('/login')
+    await page.getByLabel(/email/i).fill('admin@example.com')
+    await page.getByLabel(/password/i).fill('adminpass123')
+    await page.getByRole('button', { name: /sign in/i }).click()
+    await expect(page).toHaveURL('/')
+    // Reload — cookie is httpOnly so it persists; /auth/me re-bootstraps state
+    await page.reload()
+    await expect(page).toHaveURL('/')
+    await expect(page.getByRole('heading', { name: /ai-dash/i })).toBeVisible()
+  })
 })

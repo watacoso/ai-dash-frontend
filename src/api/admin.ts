@@ -4,12 +4,12 @@ export interface InviteResponse {
   invite_url: string
 }
 
-async function authFetch(url: string, token: string, options: RequestInit = {}) {
+async function authFetch(url: string, options: RequestInit = {}) {
   const res = await fetch(url, {
     ...options,
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
       ...(options.headers as Record<string, string>),
     },
   })
@@ -17,26 +17,26 @@ async function authFetch(url: string, token: string, options: RequestInit = {}) 
   return res.json()
 }
 
-export async function apiListUsers(token: string): Promise<UserRow[]> {
-  return authFetch('/api/admin/users', token)
+export async function apiListUsers(): Promise<UserRow[]> {
+  return authFetch('/api/admin/users')
 }
 
-export async function apiGenerateInvite(token: string, role: string): Promise<InviteResponse> {
-  return authFetch('/api/admin/invite', token, {
+export async function apiGenerateInvite(role: string): Promise<InviteResponse> {
+  return authFetch('/api/admin/invite', {
     method: 'POST',
     body: JSON.stringify({ role }),
   })
 }
 
-export async function apiPatchRole(token: string, userId: string, role: string): Promise<UserRow> {
-  return authFetch(`/api/admin/users/${userId}/role`, token, {
+export async function apiPatchRole(userId: string, role: string): Promise<UserRow> {
+  return authFetch(`/api/admin/users/${userId}/role`, {
     method: 'PATCH',
     body: JSON.stringify({ role }),
   })
 }
 
-export async function apiPatchActive(token: string, userId: string, is_active: boolean): Promise<UserRow> {
-  return authFetch(`/api/admin/users/${userId}/active`, token, {
+export async function apiPatchActive(userId: string, is_active: boolean): Promise<UserRow> {
+  return authFetch(`/api/admin/users/${userId}/active`, {
     method: 'PATCH',
     body: JSON.stringify({ is_active }),
   })

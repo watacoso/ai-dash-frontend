@@ -25,32 +25,47 @@ function renderWithAuth(value: AuthContextValue, initialPath = '/') {
 }
 
 const authenticatedCtx: AuthContextValue = {
-  token: 'tok',
+  user: { id: 'u1', email: 'a@b.com', role: 'analyst' },
   isAuthenticated: true,
-  login: () => {},
-  logout: () => {},
+  role: 'analyst',
+  loading: false,
+  login: async () => {},
+  logout: async () => {},
 }
 
 const unauthenticatedCtx: AuthContextValue = {
-  token: null,
+  user: null,
   isAuthenticated: false,
-  login: () => {},
-  logout: () => {},
+  role: null,
+  loading: false,
+  login: async () => {},
+  logout: async () => {},
+}
+
+const loadingCtx: AuthContextValue = {
+  user: null,
+  isAuthenticated: false,
+  role: null,
+  loading: true,
+  login: async () => {},
+  logout: async () => {},
 }
 
 describe('ProtectedRoute', () => {
   it('should render children when authenticated', () => {
-    // Arrange / Act
     renderWithAuth(authenticatedCtx)
-    // Assert
     expect(screen.getByText('protected content')).toBeInTheDocument()
   })
 
-  it('should redirect to /login when not authenticated', () => {
-    // Arrange / Act
+  it('should redirect to /login when not authenticated and not loading', () => {
     renderWithAuth(unauthenticatedCtx)
-    // Assert
     expect(screen.getByText('login page')).toBeInTheDocument()
     expect(screen.queryByText('protected content')).not.toBeInTheDocument()
+  })
+
+  it('should render nothing while loading (prevents flash redirect)', () => {
+    renderWithAuth(loadingCtx)
+    expect(screen.queryByText('protected content')).not.toBeInTheDocument()
+    expect(screen.queryByText('login page')).not.toBeInTheDocument()
   })
 })
