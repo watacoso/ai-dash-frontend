@@ -3,6 +3,7 @@ import { createContext, useContext, useState } from 'react'
 export interface AuthContextValue {
   token: string | null
   isAuthenticated: boolean
+  role: string | null
   login: (token: string) => void
   logout: () => void
 }
@@ -15,14 +16,30 @@ export function useAuth(): AuthContextValue {
   return ctx
 }
 
+function parseRole(token: string): string | null {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]))
+    return typeof payload.role === 'string' ? payload.role : null
+  } catch {
+    return null
+  }
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(null)
+  const [role, setRole] = useState<string | null>(null)
 
-  const login = (t: string) => setToken(t)
-  const logout = () => setToken(null)
+  const login = (t: string) => {
+    setToken(t)
+    setRole(parseRole(t))
+  }
+  const logout = () => {
+    setToken(null)
+    setRole(null)
+  }
 
   return (
-    <AuthContext.Provider value={{ token, isAuthenticated: token !== null, login, logout }}>
+    <AuthContext.Provider value={{ token, isAuthenticated: token !== null, role, login, logout }}>
       {children}
     </AuthContext.Provider>
   )
