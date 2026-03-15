@@ -45,7 +45,6 @@ async function setupConnections(page: any) {
   await page.getByLabel(/private key/i).fill('-----BEGIN PRIVATE KEY-----\nkey\n-----END PRIVATE KEY-----')
   await page.getByLabel(/warehouse/i).fill('WH')
   await page.getByLabel(/database/i).fill('DB')
-  await page.getByLabel(/^schema$/i).fill('PUBLIC')
   await page.getByRole('button', { name: /save/i }).click()
   await expect(page.getByText('e2e-sf').first()).toBeVisible()
 
