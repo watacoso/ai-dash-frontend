@@ -7,7 +7,7 @@ interface SessionContextValue {
   setClaudeId: (id: string | null) => void
 }
 
-const SessionContext = createContext<SessionContextValue>({
+export const SessionContext = createContext<SessionContextValue>({
   snowflakeId: null,
   claudeId: null,
   setSnowflakeId: () => {},

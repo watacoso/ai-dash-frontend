@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { ConnectionRow, apiListConnections } from '../api/connections'
+import { ChatMessage, apiExploreChat } from '../api/explore'
+import { ExploreChat } from '../components/ExploreChat'
 import { useSession } from '../context/SessionContext'
 
 export function ExplorePage() {
@@ -8,6 +10,9 @@ export function ExplorePage() {
   const [selectedSf, setSelectedSf] = useState('')
   const [selectedCl, setSelectedCl] = useState('')
   const [started, setStarted] = useState(snowflakeId !== null && claudeId !== null)
+  const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     apiListConnections().then(setConnections)
@@ -23,11 +28,32 @@ export function ExplorePage() {
     setStarted(true)
   }
 
+  async function handleSend(text: string) {
+    const userMsg: ChatMessage = { role: 'user', content: text }
+    const nextMessages = [...messages, userMsg]
+    setMessages(nextMessages)
+    setLoading(true)
+    setError(null)
+    try {
+      const response = await apiExploreChat({
+        snowflake_connection_id: snowflakeId!,
+        claude_connection_id: claudeId!,
+        messages: nextMessages,
+      })
+      setMessages((prev) => [...prev, response])
+    } catch {
+      setError('Failed to get a response. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   if (started) {
     return (
       <main>
         <h1>Explore</h1>
-        <p>Session active — chat interface coming in EPI-0003.</p>
+        {error && <p role="alert" className="error-text">{error}</p>}
+        <ExploreChat messages={messages} loading={loading} onSend={handleSend} />
       </main>
     )
   }
