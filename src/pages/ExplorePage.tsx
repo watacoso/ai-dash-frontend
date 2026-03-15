@@ -53,7 +53,7 @@ export function ExplorePage() {
       <main>
         <h1>Explore</h1>
         {error && <p role="alert" className="error-text">{error}</p>}
-        <ExploreChat messages={messages} loading={loading} onSend={handleSend} />
+        <ExploreChat messages={messages} loading={loading} onSend={handleSend} connectionId={snowflakeId!} />
       </main>
     )
   }

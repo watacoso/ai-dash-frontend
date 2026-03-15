@@ -26,6 +26,12 @@ export default async function globalSetup() {
     }
   }
 
+  if (!process.env.E2E_SF_ACCOUNT) {
+    console.warn(
+      '[E2E WARNING] E2E_SF_ACCOUNT is not set — live Snowflake tests (live chat, autocomplete) will fail. Add credentials to .env.e2e to run them.'
+    )
+  }
+
   execSync(
     'source .venv/bin/activate && python -m app.auth.e2e_reset && python -m app.auth.db_create',
     { cwd: backendDir, shell: '/bin/zsh', stdio: 'inherit' }

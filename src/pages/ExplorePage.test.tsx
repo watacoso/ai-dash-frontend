@@ -7,7 +7,9 @@ import { ExplorePage } from './ExplorePage'
 import { SessionProvider, useSession, SessionContext } from '../context/SessionContext'
 import { AuthContext, AuthContextValue } from '../auth/AuthContext'
 
-const server = setupServer()
+const server = setupServer(
+  http.get('/api/explore/schema', () => HttpResponse.json({ items: [] }))
+)
 beforeAll(() => server.listen())
 afterEach(() => { server.resetHandlers(); vi.restoreAllMocks() })
 afterAll(() => server.close())

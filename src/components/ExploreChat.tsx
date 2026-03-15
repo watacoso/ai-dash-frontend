@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
+import { AutocompleteInput } from './AutocompleteInput'
 
 interface Message {
   role: string
@@ -9,28 +10,15 @@ interface Props {
   messages: Message[]
   loading: boolean
   onSend: (message: string) => void
+  connectionId: string
 }
 
-export function ExploreChat({ messages, loading, onSend }: Props) {
-  const [input, setInput] = useState('')
+export function ExploreChat({ messages, loading, onSend, connectionId }: Props) {
   const bottomRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
-
-  function handleSend() {
-    if (!input.trim() || loading) return
-    onSend(input)
-    setInput('')
-  }
-
-  function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      handleSend()
-    }
-  }
 
   return (
     <div className="chat">
@@ -43,19 +31,7 @@ export function ExploreChat({ messages, loading, onSend }: Props) {
         {loading && <div className="chat-thinking">Thinking…</div>}
         <div ref={bottomRef} />
       </div>
-
-      <div className="chat-input-row">
-        <textarea
-          value={input}
-          disabled={loading}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Ask about your data…"
-        />
-        <button onClick={handleSend} disabled={!input.trim() || loading}>
-          Send
-        </button>
-      </div>
+      <AutocompleteInput connectionId={connectionId} loading={loading} onSend={onSend} />
     </div>
   )
 }
