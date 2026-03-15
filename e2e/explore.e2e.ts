@@ -106,6 +106,8 @@ async function teardownLiveConnections(page: any) {
 // ── Live chat tests (requires .env.e2e with real Snowflake + Claude credentials) ──
 
 test.describe('Explore — live chat', () => {
+  test.setTimeout(120_000) // Snowflake + Claude round trips can take >30s
+
   test.beforeEach(async ({ page }) => {
     test.skip(
       !process.env.E2E_SF_ACCOUNT,
@@ -132,10 +134,10 @@ test.describe('Explore — live chat', () => {
     await page.getByPlaceholder(/ask about your data/i).fill('what databases are available?')
     await page.getByRole('button', { name: /send/i }).click()
 
-    // Wait for the AI response bubble to appear (may take a few seconds)
+    // Wait for the AI response bubble — Snowflake + Claude round trip can take >30s
     await expect(
       page.locator('.chat-bubble[data-role="assistant"]').first()
-    ).not.toBeEmpty({ timeout: 30000 })
+    ).not.toBeEmpty({ timeout: 90000 })
   })
 
   test('analyst can ask about schemas and gets schema list', async ({ page }) => {
@@ -151,14 +153,14 @@ test.describe('Explore — live chat', () => {
     await page.getByRole('button', { name: /send/i }).click()
     await expect(
       page.locator('.chat-bubble[data-role="assistant"]').first()
-    ).not.toBeEmpty({ timeout: 30000 })
+    ).not.toBeEmpty({ timeout: 90000 })
 
     // Second message — verify history is maintained
     await page.getByPlaceholder(/ask about your data/i).fill('what schemas are in my database?')
     await page.getByRole('button', { name: /send/i }).click()
     await expect(
       page.locator('.chat-bubble[data-role="assistant"]').nth(1)
-    ).not.toBeEmpty({ timeout: 30000 })
+    ).not.toBeEmpty({ timeout: 90000 })
   })
 })
 
