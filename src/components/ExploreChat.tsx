@@ -1,4 +1,6 @@
 import { useEffect, useRef } from 'react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import { AutocompleteInput } from './AutocompleteInput'
 
 interface Message {
@@ -25,7 +27,11 @@ export function ExploreChat({ messages, loading, onSend, connectionId }: Props) 
       <div className="chat-messages">
         {messages.map((msg, i) => (
           <div key={i} className="chat-bubble" data-role={msg.role}>
-            {msg.content}
+            {msg.role === 'assistant' ? (
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
+            ) : (
+              msg.content
+            )}
           </div>
         ))}
         {loading && <div className="chat-thinking">Thinking…</div>}
