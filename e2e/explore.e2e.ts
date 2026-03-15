@@ -196,3 +196,47 @@ test.describe('Explore — session-start selector', () => {
     await expect(page.getByText(/no snowflake connections available/i)).toBeVisible()
   })
 })
+
+// ── Autocomplete tests (requires .env.e2e with real Snowflake credentials) ──
+
+test.describe('Explore — autocomplete', () => {
+  test.beforeEach(async ({ page }) => {
+    await setupLiveConnections(page)
+  })
+
+  test.afterEach(async ({ page }) => {
+    await loginAsAdmin(page)
+    await teardownLiveConnections(page)
+  })
+
+  test('dropdown appears when data: is typed in chat input', async ({ page }) => {
+    await loginAsAnalyst(page)
+    await page.goto('/explore')
+
+    await page.getByLabel(/snowflake connection/i).selectOption({ label: 'e2e-sf-live' })
+    await page.getByLabel(/claude model/i).selectOption({ label: 'e2e-cl-live' })
+    await page.getByRole('button', { name: /start session/i }).click()
+    await expect(page.getByRole('heading', { name: /explore/i })).toBeVisible()
+
+    await page.getByPlaceholder(/ask about your data/i).fill('data:')
+    await expect(page.getByRole('listbox')).toBeVisible({ timeout: 5000 })
+  })
+
+  test('Tab inserts selected suggestion and closes dropdown', async ({ page }) => {
+    await loginAsAnalyst(page)
+    await page.goto('/explore')
+
+    await page.getByLabel(/snowflake connection/i).selectOption({ label: 'e2e-sf-live' })
+    await page.getByLabel(/claude model/i).selectOption({ label: 'e2e-cl-live' })
+    await page.getByRole('button', { name: /start session/i }).click()
+
+    const input = page.getByPlaceholder(/ask about your data/i)
+    await input.fill('data:')
+    await expect(page.getByRole('listbox')).toBeVisible({ timeout: 5000 })
+
+    await input.press('Tab')
+    await expect(page.getByRole('listbox')).not.toBeVisible()
+    const value = await input.inputValue()
+    expect(value).toMatch(/^data:.+/)
+  })
+})

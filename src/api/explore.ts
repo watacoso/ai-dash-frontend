@@ -33,3 +33,22 @@ export async function apiExploreChat(payload: ChatPayload): Promise<ChatResponse
     body: JSON.stringify(payload),
   })
 }
+
+export interface SchemaParams {
+  connection_id: string
+  level: 'databases' | 'schemas' | 'tables' | 'columns'
+  database?: string
+  schema?: string
+  table?: string
+}
+
+export async function apiGetSchema(params: SchemaParams): Promise<string[]> {
+  const qs = new URLSearchParams()
+  qs.set('connection_id', params.connection_id)
+  qs.set('level', params.level)
+  if (params.database) qs.set('database', params.database)
+  if (params.schema) qs.set('schema', params.schema)
+  if (params.table) qs.set('table', params.table)
+  const result = await authFetch(`/api/explore/schema?${qs}`)
+  return result.items
+}
