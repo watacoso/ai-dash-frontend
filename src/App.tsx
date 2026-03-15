@@ -4,6 +4,7 @@ import { ProtectedRoute } from './auth/ProtectedRoute'
 import { RoleGuard } from './auth/RoleGuard'
 import { LoginPage } from './pages/LoginPage'
 import { AdminPage } from './pages/AdminPage'
+import { SettingsPage } from './pages/SettingsPage'
 import { Nav } from './components/Nav'
 
 function HomePage() {
@@ -37,6 +38,16 @@ export function App() {
               <ProtectedRoute>
                 <RoleGuard role="admin">
                   <AdminPage />
+                </RoleGuard>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings/connections"
+            element={
+              <ProtectedRoute>
+                <RoleGuard role="admin">
+                  <SettingsPage />
                 </RoleGuard>
               </ProtectedRoute>
             }

@@ -7,6 +7,7 @@ export function Nav() {
     <nav>
       <Link to="/">Home</Link>
       {role === 'admin' && <Link to="/admin">Admin</Link>}
+      {role === 'admin' && <Link to="/settings/connections">Settings</Link>}
     </nav>
   )
 }
