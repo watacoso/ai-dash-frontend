@@ -106,7 +106,7 @@ async function teardownLiveConnections(page: any) {
 // ── Live chat tests (requires .env.e2e with real Snowflake + Claude credentials) ──
 
 test.describe('Explore — live chat', () => {
-  test.setTimeout(120_000) // Snowflake + Claude round trips can take >30s
+  test.setTimeout(180_000) // Snowflake + Claude round trips can take >60s under load
 
   test.beforeEach(async ({ page }) => {
     test.skip(
@@ -137,7 +137,7 @@ test.describe('Explore — live chat', () => {
     // Wait for the AI response bubble — Snowflake + Claude round trip can take >30s
     await expect(
       page.locator('.chat-bubble[data-role="assistant"]').first()
-    ).not.toBeEmpty({ timeout: 90000 })
+    ).not.toBeEmpty({ timeout: 150000 })
   })
 
   test('analyst can ask about schemas and gets schema list', async ({ page }) => {
@@ -153,14 +153,14 @@ test.describe('Explore — live chat', () => {
     await page.getByRole('button', { name: /send/i }).click()
     await expect(
       page.locator('.chat-bubble[data-role="assistant"]').first()
-    ).not.toBeEmpty({ timeout: 90000 })
+    ).not.toBeEmpty({ timeout: 150000 })
 
     // Second message — verify history is maintained
     await page.getByPlaceholder(/ask about your data/i).fill('what schemas are in my database?')
     await page.getByRole('button', { name: /send/i }).click()
     await expect(
       page.locator('.chat-bubble[data-role="assistant"]').nth(1)
-    ).not.toBeEmpty({ timeout: 90000 })
+    ).not.toBeEmpty({ timeout: 150000 })
   })
 })
 
@@ -242,7 +242,7 @@ test.describe('Explore — autocomplete', () => {
 })
 
 test.describe('Explore — debug panel', () => {
-  test.setTimeout(120_000)
+  test.setTimeout(180_000)
 
   test.beforeEach(async ({ page }) => {
     test.skip(
@@ -270,7 +270,7 @@ test.describe('Explore — debug panel', () => {
     await startSession(page)
     await page.getByPlaceholder(/ask about your data/i).fill('hi')
     await page.getByRole('button', { name: /send/i }).click()
-    await expect(page.locator('.chat-bubble[data-role="assistant"]').first()).not.toBeEmpty({ timeout: 90000 })
+    await expect(page.locator('.chat-bubble[data-role="assistant"]').first()).not.toBeEmpty({ timeout: 150000 })
 
     // Open
     await page.getByRole('button', { name: /debug/i }).click()
@@ -285,7 +285,7 @@ test.describe('Explore — debug panel', () => {
     await startSession(page)
     await page.getByPlaceholder(/ask about your data/i).fill('what databases are available?')
     await page.getByRole('button', { name: /send/i }).click()
-    await expect(page.locator('.chat-bubble[data-role="assistant"]').first()).not.toBeEmpty({ timeout: 90000 })
+    await expect(page.locator('.chat-bubble[data-role="assistant"]').first()).not.toBeEmpty({ timeout: 150000 })
 
     await page.getByRole('button', { name: /debug/i }).click()
     await expect(page.locator('.debug-panel')).toBeVisible()
@@ -297,7 +297,7 @@ test.describe('Explore — debug panel', () => {
     await startSession(page)
     await page.getByPlaceholder(/ask about your data/i).fill('what databases are available?')
     await page.getByRole('button', { name: /send/i }).click()
-    await expect(page.locator('.chat-bubble[data-role="assistant"]').first()).not.toBeEmpty({ timeout: 90000 })
+    await expect(page.locator('.chat-bubble[data-role="assistant"]').first()).not.toBeEmpty({ timeout: 150000 })
 
     await page.getByRole('button', { name: /debug/i }).click()
     await expect(page.locator('.debug-entry').first()).toBeVisible()
