@@ -62,12 +62,12 @@ test.describe('Admin — user management', () => {
     await spaNavigate(page, '/admin')
     await expect(page.getByRole('heading', { name: /^admin$/i })).toBeVisible()
 
-    // Find analyst row and change role
-    const analystRow = page.getByRole('row').filter({ hasText: 'analyst@example.com' })
-    await analystRow.getByRole('combobox').selectOption('admin')
+    // Find newuser row (created in previous test as analyst) and change role
+    const newUserRow = page.getByRole('row').filter({ hasText: 'newuser@example.com' })
+    await newUserRow.getByRole('combobox').selectOption('admin')
 
     // Row should now show admin
-    await expect(analystRow.getByRole('combobox')).toHaveValue('admin')
+    await expect(newUserRow.getByRole('combobox')).toHaveValue('admin')
   })
 
   test('admin deactivates a user', async ({ page }) => {
@@ -75,10 +75,11 @@ test.describe('Admin — user management', () => {
     await spaNavigate(page, '/admin')
     await expect(page.getByRole('heading', { name: /^admin$/i })).toBeVisible()
 
-    const analystRow = page.getByRole('row').filter({ hasText: 'analyst@example.com' })
-    await analystRow.getByRole('button', { name: /deactivate/i }).click()
+    // Deactivate newuser (created in first test) — avoids polluting shared analyst seed
+    const newUserRow = page.getByRole('row').filter({ hasText: 'newuser@example.com' })
+    await newUserRow.getByRole('button', { name: /deactivate/i }).click()
 
     // Row should now show inactive
-    await expect(analystRow.getByText('inactive')).toBeVisible()
+    await expect(newUserRow.getByText('inactive')).toBeVisible()
   })
 })
