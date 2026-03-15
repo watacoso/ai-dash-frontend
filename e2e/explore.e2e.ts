@@ -83,6 +83,7 @@ test.describe('Explore — session-start selector', () => {
     // Use a fresh admin session to verify message when no matching connections exist
     await loginAsAdmin(page)
     await page.goto('/explore')
+    await expect(page.getByRole('heading', { name: /new session/i })).toBeVisible()
     // If no snowflake connections exist, message should show
     const sfSelect = page.getByLabel(/snowflake connection/i)
     const noSfMsg = page.getByText(/no snowflake connections available/i)
