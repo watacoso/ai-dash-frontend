@@ -33,18 +33,18 @@ export function ExploreChat({ messages, loading, onSend }: Props) {
   }
 
   return (
-    <div>
-      <div>
+    <div className="chat">
+      <div className="chat-messages">
         {messages.map((msg, i) => (
-          <div key={i} data-role={msg.role}>
+          <div key={i} className="chat-bubble" data-role={msg.role}>
             {msg.content}
           </div>
         ))}
-        {loading && <div>Thinking…</div>}
+        {loading && <div className="chat-thinking">Thinking…</div>}
         <div ref={bottomRef} />
       </div>
 
-      <div>
+      <div className="chat-input-row">
         <textarea
           value={input}
           disabled={loading}

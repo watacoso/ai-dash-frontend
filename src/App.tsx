@@ -9,11 +9,19 @@ import { ExplorePage } from './pages/ExplorePage'
 import { SessionProvider } from './context/SessionContext'
 import { Nav } from './components/Nav'
 
+function AppLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <>
+      <Nav />
+      <div className="page-content">{children}</div>
+    </>
+  )
+}
+
 function HomePage() {
   const { logout } = useAuth()
   return (
     <>
-      <Nav />
       <h1>AI-Dash</h1>
       <button onClick={logout}>Log out</button>
     </>
@@ -24,48 +32,48 @@ export function App() {
   return (
     <AuthProvider>
       <SessionProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <HomePage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute>
-                <RoleGuard role="admin">
-                  <AdminPage />
-                </RoleGuard>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/settings/connections"
-            element={
-              <ProtectedRoute>
-                <RoleGuard role="admin">
-                  <SettingsPage />
-                </RoleGuard>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/explore"
-            element={
-              <ProtectedRoute>
-                <ExplorePage />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </BrowserRouter>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <AppLayout><HomePage /></AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute>
+                  <RoleGuard role="admin">
+                    <AppLayout><AdminPage /></AppLayout>
+                  </RoleGuard>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings/connections"
+              element={
+                <ProtectedRoute>
+                  <RoleGuard role="admin">
+                    <AppLayout><SettingsPage /></AppLayout>
+                  </RoleGuard>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/explore"
+              element={
+                <ProtectedRoute>
+                  <AppLayout><ExplorePage /></AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </BrowserRouter>
       </SessionProvider>
     </AuthProvider>
   )

@@ -43,7 +43,7 @@ export function InviteModal({ onInvite, onClose }: Props) {
       ) : (
         <div>
           <p>Share this link with the new user:</p>
-          <span>{inviteUrl}</span>
+          <span className="invite-url">{inviteUrl}</span>
           <button onClick={onClose}>Close</button>
         </div>
       )}

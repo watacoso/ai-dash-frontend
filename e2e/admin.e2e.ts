@@ -35,7 +35,7 @@ test.describe('Admin — user management', () => {
     await page.getByRole('button', { name: /generate invite/i }).click()
 
     // Grab the invite URL from the modal
-    const inviteText = await page.locator('span').last().textContent()
+    const inviteText = await page.locator('.invite-url').textContent()
     expect(inviteText).toContain('/accept-invite?token=')
     const inviteUrl = inviteText!
     const token = new URL(inviteUrl).searchParams.get('token')!

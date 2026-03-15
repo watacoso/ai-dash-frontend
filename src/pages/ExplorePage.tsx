@@ -33,51 +33,53 @@ export function ExplorePage() {
   }
 
   return (
-    <main>
-      <h1>New session</h1>
-      <p>Select the connections to use for this session.</p>
+    <div className="session-start">
+      <div className="session-card">
+        <h1>New session</h1>
+        <p>Select the connections to use for this session.</p>
 
-      <div>
-        <label htmlFor="sf-select">Snowflake connection</label>
-        {snowflakeConns.length === 0 ? (
-          <p>No Snowflake connections available — ask your admin to add one.</p>
-        ) : (
-          <select
-            id="sf-select"
-            aria-label="Snowflake connection"
-            value={selectedSf}
-            onChange={(e) => setSelectedSf(e.target.value)}
-          >
-            <option value="">— select —</option>
-            {snowflakeConns.map((c) => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-          </select>
-        )}
+        <div className="form-field">
+          <label htmlFor="sf-select">Snowflake connection</label>
+          {snowflakeConns.length === 0 ? (
+            <p>No Snowflake connections available — ask your admin to add one.</p>
+          ) : (
+            <select
+              id="sf-select"
+              aria-label="Snowflake connection"
+              value={selectedSf}
+              onChange={(e) => setSelectedSf(e.target.value)}
+            >
+              <option value="">— select —</option>
+              {snowflakeConns.map((c) => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+          )}
+        </div>
+
+        <div className="form-field">
+          <label htmlFor="cl-select">Claude model</label>
+          {claudeConns.length === 0 ? (
+            <p>No Claude connections available — ask your admin to add one.</p>
+          ) : (
+            <select
+              id="cl-select"
+              aria-label="Claude model"
+              value={selectedCl}
+              onChange={(e) => setSelectedCl(e.target.value)}
+            >
+              <option value="">— select —</option>
+              {claudeConns.map((c) => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+          )}
+        </div>
+
+        <button onClick={handleStart} disabled={!canStart}>
+          Start session
+        </button>
       </div>
-
-      <div>
-        <label htmlFor="cl-select">Claude model</label>
-        {claudeConns.length === 0 ? (
-          <p>No Claude connections available — ask your admin to add one.</p>
-        ) : (
-          <select
-            id="cl-select"
-            aria-label="Claude model"
-            value={selectedCl}
-            onChange={(e) => setSelectedCl(e.target.value)}
-          >
-            <option value="">— select —</option>
-            {claudeConns.map((c) => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-          </select>
-        )}
-      </div>
-
-      <button onClick={handleStart} disabled={!canStart}>
-        Start session
-      </button>
-    </main>
+    </div>
   )
 }
