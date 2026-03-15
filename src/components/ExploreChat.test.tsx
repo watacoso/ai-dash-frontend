@@ -71,6 +71,43 @@ describe('ExploreChat', () => {
     expect(input).toHaveValue('')
   })
 
+  it('should render assistant message markdown as HTML', () => {
+    // Arrange
+    const messages = [{ role: 'assistant', content: 'This is **bold** text.' }]
+    // Act
+    render(<ExploreChat messages={messages} loading={false} onSend={vi.fn()} connectionId="sf-1" />)
+    // Assert — bold markdown rendered as <strong>
+    expect(document.querySelector('strong')).toBeInTheDocument()
+  })
+
+  it('should render markdown headings in assistant messages', () => {
+    // Arrange
+    const messages = [{ role: 'assistant', content: '## My Heading' }]
+    // Act
+    render(<ExploreChat messages={messages} loading={false} onSend={vi.fn()} connectionId="sf-1" />)
+    // Assert
+    expect(screen.getByRole('heading', { name: 'My Heading' })).toBeInTheDocument()
+  })
+
+  it('should render markdown tables in assistant messages', () => {
+    // Arrange
+    const messages = [{ role: 'assistant', content: '| Col A | Col B |\n|---|---|\n| 1 | 2 |' }]
+    // Act
+    render(<ExploreChat messages={messages} loading={false} onSend={vi.fn()} connectionId="sf-1" />)
+    // Assert
+    expect(document.querySelector('table')).toBeInTheDocument()
+  })
+
+  it('should render user messages as plain text without markdown processing', () => {
+    // Arrange
+    const messages = [{ role: 'user', content: '**not bold**' }]
+    // Act
+    render(<ExploreChat messages={messages} loading={false} onSend={vi.fn()} connectionId="sf-1" />)
+    // Assert — raw text visible, no <strong> element
+    expect(screen.getByText('**not bold**')).toBeInTheDocument()
+    expect(document.querySelector('strong')).not.toBeInTheDocument()
+  })
+
   it('should scroll latest message into view when messages change', () => {
     const { rerender } = render(
       <ExploreChat messages={MESSAGES.slice(0, 1)} loading={false} onSend={vi.fn()} connectionId="sf-1" />
