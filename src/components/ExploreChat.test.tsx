@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { vi, describe, it, expect, beforeAll } from 'vitest'
 import { ExploreChat } from './ExploreChat'
 
@@ -114,5 +114,85 @@ describe('ExploreChat', () => {
     )
     rerender(<ExploreChat messages={MESSAGES} loading={false} onSend={vi.fn()} connectionId="sf-1" />)
     expect(window.HTMLElement.prototype.scrollIntoView).toHaveBeenCalled()
+  })
+
+  // --- TKT-0019: Export button ---
+
+  it('should not render Export button when messages is empty', () => {
+    render(<ExploreChat messages={[]} loading={false} onSend={vi.fn()} connectionId="sf-1" logs={[]} />)
+    expect(screen.queryByRole('button', { name: /export/i })).not.toBeInTheDocument()
+  })
+
+  it('should render Export button when at least one message exists', () => {
+    render(<ExploreChat messages={MESSAGES} loading={false} onSend={vi.fn()} connectionId="sf-1" logs={[]} />)
+    expect(screen.getByRole('button', { name: /export/i })).toBeInTheDocument()
+  })
+
+  it('should copy structured text to clipboard on Export click', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    Object.assign(navigator, { clipboard: { writeText } })
+    const logs = [{ level: 'ERROR', message: 'db error' }]
+    render(<ExploreChat messages={MESSAGES} loading={false} onSend={vi.fn()} connectionId="sf-1" logs={logs} />)
+    fireEvent.click(screen.getByRole('button', { name: /export/i }))
+    await waitFor(() => expect(writeText).toHaveBeenCalledOnce())
+    const text: string = writeText.mock.calls[0][0]
+    expect(text).toContain('[User]')
+    expect(text).toContain('[Assistant]')
+    expect(text).toContain('## Logs')
+  })
+
+  it('should format user messages with [User] prefix', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    Object.assign(navigator, { clipboard: { writeText } })
+    render(<ExploreChat messages={MESSAGES} loading={false} onSend={vi.fn()} connectionId="sf-1" logs={[]} />)
+    fireEvent.click(screen.getByRole('button', { name: /export/i }))
+    await waitFor(() => expect(writeText).toHaveBeenCalledOnce())
+    const text: string = writeText.mock.calls[0][0]
+    expect(text).toContain('[User]\nWhat databases do I have?')
+  })
+
+  it('should format assistant messages with [Assistant] prefix', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    Object.assign(navigator, { clipboard: { writeText } })
+    render(<ExploreChat messages={MESSAGES} loading={false} onSend={vi.fn()} connectionId="sf-1" logs={[]} />)
+    fireEvent.click(screen.getByRole('button', { name: /export/i }))
+    await waitFor(() => expect(writeText).toHaveBeenCalledOnce())
+    const text: string = writeText.mock.calls[0][0]
+    expect(text).toContain('[Assistant]\nYou have DB1 and DB2.')
+  })
+
+  it('should append ## Logs section with level and message', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    Object.assign(navigator, { clipboard: { writeText } })
+    const logs = [{ level: 'ERROR', message: 'db err' }]
+    render(<ExploreChat messages={MESSAGES} loading={false} onSend={vi.fn()} connectionId="sf-1" logs={logs} />)
+    fireEvent.click(screen.getByRole('button', { name: /export/i }))
+    await waitFor(() => expect(writeText).toHaveBeenCalledOnce())
+    const text: string = writeText.mock.calls[0][0]
+    expect(text).toContain('## Logs\n[ERROR] db err')
+  })
+
+  it('should show confirmation text after successful copy', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    Object.assign(navigator, { clipboard: { writeText } })
+    render(<ExploreChat messages={MESSAGES} loading={false} onSend={vi.fn()} connectionId="sf-1" logs={[]} />)
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /export/i }))
+    })
+    expect(screen.getByText(/copied/i)).toBeInTheDocument()
+  })
+
+  it('should hide confirmation after 3 seconds', async () => {
+    vi.useFakeTimers()
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    Object.assign(navigator, { clipboard: { writeText } })
+    render(<ExploreChat messages={MESSAGES} loading={false} onSend={vi.fn()} connectionId="sf-1" logs={[]} />)
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /export/i }))
+    })
+    expect(screen.getByText(/copied/i)).toBeInTheDocument()
+    await act(async () => { vi.advanceTimersByTime(3000) })
+    expect(screen.queryByText(/copied/i)).not.toBeInTheDocument()
+    vi.useRealTimers()
   })
 })

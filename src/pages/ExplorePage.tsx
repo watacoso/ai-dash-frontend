@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { ConnectionRow, apiListConnections } from '../api/connections'
-import { ChatMessage, apiExploreChat } from '../api/explore'
+import { ChatMessage, LogEntry, apiExploreChat } from '../api/explore'
 import { ExploreChat } from '../components/ExploreChat'
 import { useSession } from '../context/SessionContext'
 
@@ -11,6 +11,7 @@ export function ExplorePage() {
   const [selectedCl, setSelectedCl] = useState('')
   const [started, setStarted] = useState(snowflakeId !== null && claudeId !== null)
   const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [logs, setLogs] = useState<LogEntry[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -40,7 +41,10 @@ export function ExplorePage() {
         claude_connection_id: claudeId!,
         messages: nextMessages,
       })
-      setMessages((prev) => [...prev, response])
+      setMessages((prev) => [...prev, { role: response.role, content: response.content }])
+      if (response.logs?.length) {
+        setLogs((prev) => [...prev, ...response.logs])
+      }
     } catch {
       setError('Failed to get a response. Please try again.')
     } finally {
@@ -53,7 +57,7 @@ export function ExplorePage() {
       <main>
         <h1>Explore</h1>
         {error && <p role="alert" className="error-text">{error}</p>}
-        <ExploreChat messages={messages} loading={loading} onSend={handleSend} connectionId={snowflakeId!} />
+        <ExploreChat messages={messages} logs={logs} loading={loading} onSend={handleSend} connectionId={snowflakeId!} />
       </main>
     )
   }

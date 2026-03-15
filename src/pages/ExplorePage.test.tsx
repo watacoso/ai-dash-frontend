@@ -204,3 +204,55 @@ describe('ExplorePage', () => {
     )
   })
 })
+
+describe('ExplorePage — log accumulation (TKT-0019)', () => {
+  it('should accumulate logs from chat responses and surface them via export', async () => {
+    // Arrange
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    Object.assign(navigator, { clipboard: { writeText } })
+    server.use(
+      http.post('/api/explore/chat', () =>
+        HttpResponse.json({
+          role: 'assistant',
+          content: 'Here are your databases.',
+          logs: [{ level: 'INFO', message: 'Tool call: get_schema(level=databases)' }],
+        })
+      )
+    )
+    renderStarted()
+    fireEvent.change(screen.getByPlaceholderText(/ask about your data/i), {
+      target: { value: 'list databases' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: /send/i }))
+    await waitFor(() => expect(screen.getByText('Here are your databases.')).toBeInTheDocument())
+    fireEvent.click(screen.getByRole('button', { name: /export/i }))
+    await waitFor(() => expect(writeText).toHaveBeenCalledOnce())
+    const text: string = writeText.mock.calls[0][0]
+    expect(text).toContain('[INFO] Tool call: get_schema(level=databases)')
+  })
+
+  it('should accumulate logs across multiple responses', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    Object.assign(navigator, { clipboard: { writeText } })
+    server.use(
+      http.post('/api/explore/chat', () =>
+        HttpResponse.json({
+          role: 'assistant',
+          content: 'Done.',
+          logs: [{ level: 'ERROR', message: 'connection failed' }],
+        })
+      )
+    )
+    renderStarted()
+    fireEvent.change(screen.getByPlaceholderText(/ask about your data/i), { target: { value: 'q1' } })
+    fireEvent.click(screen.getByRole('button', { name: /send/i }))
+    await waitFor(() => expect(screen.getAllByText('Done.')).toHaveLength(1))
+    fireEvent.change(screen.getByPlaceholderText(/ask about your data/i), { target: { value: 'q2' } })
+    fireEvent.click(screen.getByRole('button', { name: /send/i }))
+    await waitFor(() => expect(screen.getAllByText('Done.')).toHaveLength(2))
+    fireEvent.click(screen.getByRole('button', { name: /export/i }))
+    await waitFor(() => expect(writeText).toHaveBeenCalledOnce())
+    const text: string = writeText.mock.calls[0][0]
+    expect(text.split('[ERROR] connection failed')).toHaveLength(3)
+  })
+})

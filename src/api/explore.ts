@@ -9,9 +9,15 @@ export interface ChatPayload {
   messages: ChatMessage[]
 }
 
+export interface LogEntry {
+  level: string
+  message: string
+}
+
 export interface ChatResponse {
   role: string
   content: string
+  logs: LogEntry[]
 }
 
 async function authFetch(url: string, options: RequestInit = {}) {
