@@ -31,4 +31,14 @@ describe('Nav', () => {
     renderNav('admin')
     expect(screen.getByRole('link', { name: /admin/i })).toBeInTheDocument()
   })
+
+  it('shows Settings link for admin', () => {
+    renderNav('admin')
+    expect(screen.getByRole('link', { name: /settings/i })).toBeInTheDocument()
+  })
+
+  it('hides Settings link for analyst', () => {
+    renderNav('analyst')
+    expect(screen.queryByRole('link', { name: /settings/i })).not.toBeInTheDocument()
+  })
 })
