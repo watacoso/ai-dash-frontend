@@ -5,6 +5,8 @@ import { RoleGuard } from './auth/RoleGuard'
 import { LoginPage } from './pages/LoginPage'
 import { AdminPage } from './pages/AdminPage'
 import { SettingsPage } from './pages/SettingsPage'
+import { ExplorePage } from './pages/ExplorePage'
+import { SessionProvider } from './context/SessionContext'
 import { Nav } from './components/Nav'
 
 function HomePage() {
@@ -21,6 +23,7 @@ function HomePage() {
 export function App() {
   return (
     <AuthProvider>
+      <SessionProvider>
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
@@ -52,9 +55,18 @@ export function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/explore"
+            element={
+              <ProtectedRoute>
+                <ExplorePage />
+              </ProtectedRoute>
+            }
+          />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
+      </SessionProvider>
     </AuthProvider>
   )
 }

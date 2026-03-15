@@ -41,4 +41,14 @@ describe('Nav', () => {
     renderNav('analyst')
     expect(screen.queryByRole('link', { name: /settings/i })).not.toBeInTheDocument()
   })
+
+  it('shows New session link for analyst', () => {
+    renderNav('analyst')
+    expect(screen.getByRole('link', { name: /new session/i })).toBeInTheDocument()
+  })
+
+  it('shows New session link for admin', () => {
+    renderNav('admin')
+    expect(screen.getByRole('link', { name: /new session/i })).toBeInTheDocument()
+  })
 })
