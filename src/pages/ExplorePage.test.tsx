@@ -255,4 +255,32 @@ describe('ExplorePage — log accumulation (TKT-0019)', () => {
     const text: string = writeText.mock.calls[0][0]
     expect(text.split('[ERROR] connection failed')).toHaveLength(3)
   })
+
+  it('should clear logs without clearing messages (TKT-0020)', async () => {
+    // Arrange
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    Object.assign(navigator, { clipboard: { writeText } })
+    server.use(
+      http.post('/api/explore/chat', () =>
+        HttpResponse.json({
+          role: 'assistant',
+          content: 'Reply.',
+          logs: [{ level: 'INFO', message: 'tool called' }],
+        })
+      )
+    )
+    renderStarted()
+    fireEvent.change(screen.getByPlaceholderText(/ask about your data/i), { target: { value: 'hello' } })
+    fireEvent.click(screen.getByRole('button', { name: /send/i }))
+    await waitFor(() => expect(screen.getByText('Reply.')).toBeInTheDocument())
+    // Open debug panel and clear logs
+    fireEvent.click(screen.getByRole('button', { name: /debug/i }))
+    fireEvent.click(screen.getByRole('button', { name: /clear/i }))
+    // Messages still visible
+    expect(screen.getByText('Reply.')).toBeInTheDocument()
+    // Export no longer contains the log entry
+    fireEvent.click(screen.getByRole('button', { name: /export/i }))
+    await waitFor(() => expect(writeText).toHaveBeenCalledOnce())
+    expect(writeText.mock.calls[0][0]).not.toContain('tool called')
+  })
 })

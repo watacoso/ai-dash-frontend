@@ -195,4 +195,39 @@ describe('ExploreChat', () => {
     expect(screen.queryByText(/copied/i)).not.toBeInTheDocument()
     vi.useRealTimers()
   })
+
+  // --- TKT-0020: Debug panel toggle ---
+
+  it('should render Debug toggle button', () => {
+    render(<ExploreChat messages={MESSAGES} loading={false} onSend={vi.fn()} connectionId="sf-1" logs={[]} onClearLogs={vi.fn()} />)
+    expect(screen.getByRole('button', { name: /debug/i })).toBeInTheDocument()
+  })
+
+  it('should open debug panel when Debug is clicked', () => {
+    render(<ExploreChat messages={MESSAGES} loading={false} onSend={vi.fn()} connectionId="sf-1" logs={[]} onClearLogs={vi.fn()} />)
+    fireEvent.click(screen.getByRole('button', { name: /debug/i }))
+    expect(screen.getByRole('button', { name: /clear/i })).toBeInTheDocument()
+  })
+
+  it('should close debug panel when Debug is clicked again', () => {
+    render(<ExploreChat messages={MESSAGES} loading={false} onSend={vi.fn()} connectionId="sf-1" logs={[]} onClearLogs={vi.fn()} />)
+    fireEvent.click(screen.getByRole('button', { name: /debug/i }))
+    fireEvent.click(screen.getByRole('button', { name: /debug/i }))
+    expect(screen.queryByRole('button', { name: /clear/i })).not.toBeInTheDocument()
+  })
+
+  it('should pass logs to DebugPanel when open', () => {
+    const logs = [{ level: 'ERROR', message: 'something broke' }]
+    render(<ExploreChat messages={MESSAGES} loading={false} onSend={vi.fn()} connectionId="sf-1" logs={logs} onClearLogs={vi.fn()} />)
+    fireEvent.click(screen.getByRole('button', { name: /debug/i }))
+    expect(screen.getByText('something broke')).toBeInTheDocument()
+  })
+
+  it('should call onClearLogs when panel Clear is clicked', () => {
+    const onClearLogs = vi.fn()
+    render(<ExploreChat messages={MESSAGES} loading={false} onSend={vi.fn()} connectionId="sf-1" logs={[]} onClearLogs={onClearLogs} />)
+    fireEvent.click(screen.getByRole('button', { name: /debug/i }))
+    fireEvent.click(screen.getByRole('button', { name: /clear/i }))
+    expect(onClearLogs).toHaveBeenCalledOnce()
+  })
 })
