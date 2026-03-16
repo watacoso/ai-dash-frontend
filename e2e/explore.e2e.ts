@@ -200,6 +200,8 @@ test.describe('Explore — session-start selector', () => {
 // ── Autocomplete tests (requires .env.e2e with real Snowflake credentials) ──
 
 test.describe('Explore — autocomplete', () => {
+  test.setTimeout(60_000)
+
   test.beforeEach(async ({ page }) => {
     await setupLiveConnections(page)
   })
@@ -219,7 +221,7 @@ test.describe('Explore — autocomplete', () => {
     await expect(page.getByRole('heading', { name: /explore/i })).toBeVisible()
 
     await page.getByPlaceholder(/ask about your data/i).fill('data:')
-    await expect(page.getByRole('listbox')).toBeVisible({ timeout: 5000 })
+    await expect(page.getByRole('listbox')).toBeVisible({ timeout: 15000 })
   })
 
   test('Tab inserts selected suggestion and closes dropdown', async ({ page }) => {
@@ -232,7 +234,7 @@ test.describe('Explore — autocomplete', () => {
 
     const input = page.getByPlaceholder(/ask about your data/i)
     await input.fill('data:')
-    await expect(page.getByRole('listbox')).toBeVisible({ timeout: 5000 })
+    await expect(page.getByRole('listbox')).toBeVisible({ timeout: 15000 })
 
     await input.press('Tab')
     await expect(page.getByRole('listbox')).not.toBeVisible()
