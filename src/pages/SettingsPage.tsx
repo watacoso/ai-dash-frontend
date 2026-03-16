@@ -48,8 +48,10 @@ export function SettingsPage() {
 
   return (
     <main>
-      <h1>Connections</h1>
-      <button className="btn-primary" onClick={() => setShowForm(true)}>Add connection</button>
+      <div className="page-header">
+        <h1>Connections</h1>
+        <button className="btn-primary" onClick={() => setShowForm(true)}>Add connection</button>
+      </div>
 
       {connections.length === 0 ? (
         <p>No connections configured.</p>

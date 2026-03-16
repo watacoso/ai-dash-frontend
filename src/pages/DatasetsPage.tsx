@@ -46,7 +46,7 @@ export function DatasetsPage() {
 
   return (
     <main>
-      <div className="datasets-header">
+      <div className="page-header">
         <h1>Datasets</h1>
         <button className="btn-primary" onClick={() => { setEditingDataset(null); setDialogOpen(true) }}>Add dataset</button>
       </div>
