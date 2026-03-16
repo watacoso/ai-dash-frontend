@@ -257,10 +257,10 @@ describe('ExploreChat', () => {
     expect(screen.getByRole('button', { name: /create dataset/i })).toBeInTheDocument()
   })
 
-  it('should not show Create dataset button when multiple untagged code blocks present', () => {
+  it('should show Create dataset button for each code block when multiple blocks present', () => {
     const msgs = [{ role: 'assistant', content: '```\nSELECT 1\n```\n\n```\nSELECT 2\n```' }]
     render(<ExploreChat messages={msgs} loading={false} onSend={vi.fn()} connectionId="sf-1" onCreateDataset={vi.fn()} />)
-    expect(screen.queryByRole('button', { name: /create dataset/i })).not.toBeInTheDocument()
+    expect(screen.getAllByRole('button', { name: /create dataset/i })).toHaveLength(2)
   })
 
   it('should call onCreateDataset with extracted sql when Create dataset clicked', () => {
