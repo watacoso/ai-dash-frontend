@@ -8,6 +8,24 @@ const css = readFileSync(join(__dirname, 'index.css'), 'utf-8')
 const rootBlock = css.match(/:root\s*\{[^}]*\}/s)?.[0] ?? ''
 const outsideRoot = css.replace(rootBlock, '')
 
+describe('index.css — layout classes', () => {
+  it('should define app-layout class', () => {
+    expect(outsideRoot).toContain('.app-layout')
+  })
+
+  it('should define app-sidebar class', () => {
+    expect(outsideRoot).toContain('.app-sidebar')
+  })
+
+  it('should define app-sidebar--collapsed class', () => {
+    expect(outsideRoot).toContain('.app-sidebar--collapsed')
+  })
+
+  it('should define page-header class', () => {
+    expect(outsideRoot).toContain('.page-header')
+  })
+})
+
 describe('index.css — shared component classes', () => {
   it('should define btn-primary class', () => {
     expect(outsideRoot).toContain('.btn-primary')

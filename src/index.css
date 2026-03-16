@@ -155,7 +155,128 @@ input:focus, textarea:focus, select:focus {
 input:disabled, textarea:disabled { background: var(--color-bg); cursor: not-allowed; }
 textarea { resize: vertical; min-height: 80px; }
 
-/* ── Nav ────────────────────────────────────────────────────────────────────── */
+/* ── App layout (sidebar + main) ────────────────────────────────────────────── */
+
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ── Sidebar nav ─────────────────────────────────────────────────────────────── */
+
+.app-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 220px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  transition: width .2s ease;
+  overflow: hidden;
+}
+.app-sidebar--collapsed { width: 56px; }
+
+.app-sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: .75rem var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+  height: 52px;
+}
+.app-sidebar-logo {
+  font-size: 1rem;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-accent);
+  letter-spacing: -.02em;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.app-sidebar--collapsed .app-sidebar-logo { display: none; }
+
+.app-sidebar-toggle {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: .25rem;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  font-size: 1rem;
+  line-height: 1;
+}
+.app-sidebar-toggle:hover { background: var(--color-bg); color: var(--color-text); }
+
+.app-sidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: .125rem;
+  padding: var(--space-3) var(--space-2);
+  flex: 1;
+}
+.app-sidebar nav a {
+  display: flex;
+  align-items: center;
+  gap: .625rem;
+  padding: .45rem .625rem;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  white-space: nowrap;
+  overflow: hidden;
+  transition: color .15s, background .15s;
+}
+.app-sidebar nav a:hover { color: var(--color-text); background: var(--color-bg); }
+.app-sidebar nav a.active { color: var(--color-accent); background: var(--color-accent-tint); }
+
+.app-sidebar-icon { font-size: 1rem; flex-shrink: 0; line-height: 1; }
+.app-sidebar-label { overflow: hidden; }
+.app-sidebar--collapsed .app-sidebar-label { display: none; }
+
+/* ── Main content area ──────────────────────────────────────────────────────── */
+
+.app-main {
+  margin-left: 220px;
+  flex: 1;
+  min-width: 0;
+  transition: margin-left .2s ease;
+}
+.app-sidebar--collapsed ~ .app-main { margin-left: 56px; }
+
+.page-content {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2rem var(--space-6);
+}
+
+/* ── Page header ────────────────────────────────────────────────────────────── */
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-6);
+}
+.page-header h1 { margin: 0; }
+
+/* ── Responsive: collapse sidebar at ≤ 1280px ────────────────────────────────── */
+
+@media (max-width: 1280px) {
+  .app-sidebar { width: 56px; }
+  .app-sidebar-logo { display: none; }
+  .app-sidebar-label { display: none; }
+  .app-main { margin-left: 56px; }
+}
+
+/* ── Legacy top nav (kept for fallback reference) ────────────────────────────── */
 
 .app-nav {
   position: sticky;
@@ -176,7 +297,7 @@ textarea { resize: vertical; min-height: 80px; }
 }
 .app-nav-logo {
   font-size: 1rem;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   color: var(--color-accent);
   letter-spacing: -.02em;
   margin-right: auto;
@@ -185,7 +306,7 @@ textarea { resize: vertical; min-height: 80px; }
 .app-nav nav a {
   padding: .3rem .75rem;
   font-size: .9rem;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   color: var(--color-text-muted);
   text-decoration: none;
   border-radius: var(--radius-md);
@@ -193,14 +314,6 @@ textarea { resize: vertical; min-height: 80px; }
 }
 .app-nav nav a:hover { color: var(--color-text); background: var(--color-bg); }
 .app-nav nav a.active { color: var(--color-accent); background: var(--color-accent-tint); }
-
-/* ── Page layout ────────────────────────────────────────────────────────────── */
-
-.page-content {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 2rem 1.5rem;
-}
 
 /* ── Login page ─────────────────────────────────────────────────────────────── */
 
@@ -521,6 +634,8 @@ textarea { resize: vertical; min-height: 80px; }
 }
 
 /* ── Tables ─────────────────────────────────────────────────────────────────── */
+
+.table-actions { display: flex; gap: var(--space-2); align-items: center; }
 
 table { width: 100%; border-collapse: collapse; font-size: .9rem; }
 th { text-align: left; padding: .5rem .75rem; font-size: .8rem; font-weight: 600;

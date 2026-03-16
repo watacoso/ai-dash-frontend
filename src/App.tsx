@@ -12,10 +12,12 @@ import { Nav } from './components/Nav'
 
 function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <>
+    <div className="app-layout">
       <Nav />
-      <div className="page-content">{children}</div>
-    </>
+      <main className="app-main">
+        <div className="page-content">{children}</div>
+      </main>
+    </div>
   )
 }
 

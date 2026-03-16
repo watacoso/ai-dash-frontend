@@ -61,4 +61,14 @@ describe('Nav', () => {
     renderNav('analyst')
     expect(screen.queryByRole('link', { name: /^query$/i })).not.toBeInTheDocument()
   })
+
+  it('should render as an aside element', () => {
+    const { container } = renderNav('analyst')
+    expect(container.querySelector('aside')).toBeInTheDocument()
+  })
+
+  it('should render a collapse toggle button', () => {
+    renderNav('analyst')
+    expect(screen.getByRole('button', { name: /collapse|toggle|sidebar/i })).toBeInTheDocument()
+  })
 })
