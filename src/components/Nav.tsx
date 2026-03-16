@@ -6,6 +6,7 @@ const NAV_ITEMS = [
   { to: '/',                    icon: '🏠', label: 'Home',       end: true,  roles: null },
   { to: '/explore',             icon: '🔍', label: 'Explore',    end: false, roles: ['admin', 'analyst'] },
   { to: '/datasets',            icon: '📊', label: 'Datasets',   end: false, roles: ['admin', 'analyst'] },
+  { to: '/charts',              icon: '📈', label: 'Charts',     end: false, roles: ['admin', 'analyst'] },
   { to: '/admin',               icon: '👥', label: 'Admin',      end: false, roles: ['admin'] },
   { to: '/settings/connections',icon: '⚙️', label: 'Settings',   end: false, roles: ['admin'] },
 ] as const
