@@ -8,6 +8,24 @@ const css = readFileSync(join(__dirname, 'index.css'), 'utf-8')
 const rootBlock = css.match(/:root\s*\{[^}]*\}/s)?.[0] ?? ''
 const outsideRoot = css.replace(rootBlock, '')
 
+describe('index.css — shared component classes', () => {
+  it('should define btn-primary class', () => {
+    expect(outsideRoot).toContain('.btn-primary')
+  })
+
+  it('should define btn-secondary class', () => {
+    expect(outsideRoot).toContain('.btn-secondary')
+  })
+
+  it('should define btn-danger class', () => {
+    expect(outsideRoot).toContain('.btn-danger')
+  })
+
+  it('should define input-error class', () => {
+    expect(outsideRoot).toContain('.input-error')
+  })
+})
+
 describe('index.css — design tokens', () => {
   it('should define all colour tokens in :root', () => {
     const tokens = [

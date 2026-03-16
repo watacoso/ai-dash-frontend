@@ -36,7 +36,7 @@ export function InviteModal({ onInvite, onClose }: Props) {
             <option value="analyst">analyst</option>
             <option value="admin">admin</option>
           </select>
-          <button type="submit" disabled={loading}>
+          <button type="submit" className="btn-primary" disabled={loading}>
             {loading ? 'Generating…' : 'Generate invite'}
           </button>
         </form>
@@ -44,7 +44,7 @@ export function InviteModal({ onInvite, onClose }: Props) {
         <div>
           <p>Share this link with the new user:</p>
           <span className="invite-url">{inviteUrl}</span>
-          <button onClick={onClose}>Close</button>
+          <button className="btn-secondary" onClick={onClose}>Close</button>
         </div>
       )}
     </div>

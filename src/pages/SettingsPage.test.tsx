@@ -80,6 +80,13 @@ describe('SettingsPage', () => {
     await waitFor(() => expect(screen.getByText(/timeout/i)).toBeInTheDocument())
   })
 
+  it('should render Delete button with btn-danger class', async () => {
+    render(<SettingsPage />)
+    await waitFor(() => screen.getByText('prod-snowflake'))
+    const deleteButtons = screen.getAllByRole('button', { name: /delete/i })
+    expect(deleteButtons[0]).toHaveClass('btn-danger')
+  })
+
   it('shows spinner while test is pending', async () => {
     vi.mocked(api.apiTestConnection).mockImplementation(
       () => new Promise(() => {}) // never resolves

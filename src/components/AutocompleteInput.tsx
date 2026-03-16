@@ -194,7 +194,7 @@ export function AutocompleteInput({ connectionId, loading, onSend }: Props) {
           onKeyDown={handleKeyDown}
           placeholder="Ask about your data…"
         />
-        <button onClick={handleSend} disabled={!input.trim() || loading}>
+        <button className="btn-primary" onClick={handleSend} disabled={!input.trim() || loading}>
           Send
         </button>
       </div>

@@ -143,6 +143,16 @@ describe('ConnectionForm', () => {
     await waitFor(() => expect(onSuccess).toHaveBeenCalled())
   })
 
+  it('should render Save button with btn-primary class', () => {
+    render(<ConnectionForm onSuccess={vi.fn()} onCancel={vi.fn()} />)
+    expect(screen.getByRole('button', { name: /save/i })).toHaveClass('btn-primary')
+  })
+
+  it('should render Cancel button with btn-secondary class', () => {
+    render(<ConnectionForm onSuccess={vi.fn()} onCancel={vi.fn()} />)
+    expect(screen.getByRole('button', { name: /cancel/i })).toHaveClass('btn-secondary')
+  })
+
   it('shows error when name is empty on submit attempt', () => {
     render(<ConnectionForm onSuccess={vi.fn()} onCancel={vi.fn()} />)
     // fill all snowflake fields except name
