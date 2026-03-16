@@ -600,3 +600,15 @@ tr:last-child td { border-bottom: none; }
   max-width: 0; box-sizing: border-box;
 }
 .run-results-scroll tr:hover td { background: color-mix(in srgb, var(--color-accent) 4%, transparent); }
+
+/* TKT-0030 — Explore → Dataset flow */
+.btn-create-dataset { margin-top: .5rem; font-size: .75rem; }
+.explore-toast {
+  position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+  background: var(--color-surface); border: 1px solid var(--color-border);
+  border-radius: .5rem; padding: .6rem 1.25rem; font-size: .875rem;
+  box-shadow: 0 4px 16px rgba(0,0,0,.12); z-index: 200;
+  display: flex; align-items: center; gap: .75rem;
+}
+.explore-toast a { color: var(--color-accent); text-decoration: none; font-weight: 500; }
+.explore-toast a:hover { text-decoration: underline; }

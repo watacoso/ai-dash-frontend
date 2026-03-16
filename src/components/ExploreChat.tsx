@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { LogEntry } from '../api/explore'
@@ -17,6 +17,7 @@ interface Props {
   connectionId: string
   logs?: LogEntry[]
   onClearLogs?: () => void
+  onCreateDataset?: (sql: string) => void
 }
 
 function buildExportText(messages: Message[], logs: LogEntry[]): string {
@@ -30,10 +31,33 @@ function buildExportText(messages: Message[], logs: LogEntry[]): string {
   return chat + logSection
 }
 
-export function ExploreChat({ messages, loading, onSend, connectionId, logs = [], onClearLogs }: Props) {
+function makeCodeComponents(onCreateDataset: (sql: string) => void) {
+  return {
+    pre({ children }: React.HTMLAttributes<HTMLPreElement>) {
+      const codeEl = React.Children.toArray(children).find(
+        (c) => React.isValidElement(c)
+      ) as React.ReactElement | undefined
+      const sql = codeEl ? String(codeEl.props.children ?? '').trim() : ''
+      return (
+        <div className="code-block-wrap">
+          <pre>{children}</pre>
+          {sql && (
+            <button className="btn-secondary btn-create-dataset" onClick={() => onCreateDataset(sql)}>
+              Create dataset
+            </button>
+          )}
+        </div>
+      )
+    },
+  }
+}
+
+export function ExploreChat({ messages, loading, onSend, connectionId, logs = [], onClearLogs, onCreateDataset }: Props) {
   const bottomRef = useRef<HTMLDivElement>(null)
   const [copied, setCopied] = useState(false)
   const [debugOpen, setDebugOpen] = useState(false)
+
+  const codeComponents = onCreateDataset ? makeCodeComponents(onCreateDataset) : undefined
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -52,7 +76,9 @@ export function ExploreChat({ messages, loading, onSend, connectionId, logs = []
           {messages.map((msg, i) => (
             <div key={i} className="chat-bubble" data-role={msg.role}>
               {msg.role === 'assistant' ? (
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkGfm]} components={codeComponents}>
+                  {msg.content}
+                </ReactMarkdown>
               ) : (
                 msg.content
               )}

@@ -1,5 +1,5 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
+import { vi, describe, it, expect, beforeAll, afterEach, afterAll } from 'vitest'
 import { http, HttpResponse } from 'msw'
 import { setupServer } from 'msw/node'
 import { MemoryRouter } from 'react-router-dom'
@@ -282,5 +282,107 @@ describe('ExplorePage — log accumulation (TKT-0019)', () => {
     fireEvent.click(screen.getByRole('button', { name: /export/i }))
     await waitFor(() => expect(writeText).toHaveBeenCalledOnce())
     expect(writeText.mock.calls[0][0]).not.toContain('tool called')
+  })
+})
+
+const SQL_MSG = 'Here is the query:\n```sql\nSELECT 1\n```'
+
+async function sendSqlMessage() {
+  server.use(
+    http.post('/api/explore/chat', () =>
+      HttpResponse.json({ role: 'assistant', content: SQL_MSG })
+    )
+  )
+  renderStarted()
+  fireEvent.change(screen.getByPlaceholderText(/ask about your data/i), {
+    target: { value: 'give me sql' },
+  })
+  fireEvent.click(screen.getByRole('button', { name: /send/i }))
+  await waitFor(() => screen.getByRole('button', { name: /create dataset/i }))
+}
+
+describe('ExplorePage — create dataset flow', () => {
+  afterEach(() => vi.useRealTimers())
+
+  it('should open DatasetDialog pre-filled with sql and connection ids when Create dataset clicked', async () => {
+    await sendSqlMessage()
+    fireEvent.click(screen.getByRole('button', { name: /create dataset/i }))
+    await waitFor(() => screen.getByRole('dialog'))
+    expect(screen.getByPlaceholderText(/sql/i)).toHaveValue('SELECT 1')
+  })
+
+  it('should keep explore chat visible while DatasetDialog is open', async () => {
+    await sendSqlMessage()
+    fireEvent.click(screen.getByRole('button', { name: /create dataset/i }))
+    await waitFor(() => screen.getByRole('dialog'))
+    expect(screen.getByPlaceholderText(/ask about your data/i)).toBeInTheDocument()
+  })
+
+  it('should show toast with dataset name on successful save', async () => {
+    server.use(
+      http.post('/api/datasets', () =>
+        HttpResponse.json({ id: 'd-1', name: 'My DS', description: '', sql: 'SELECT 1',
+          snowflake_connection_id: 'sf-1', claude_connection_id: null,
+          models_used: [], created_by: 'u1', created_at: '', updated_at: '' }, { status: 201 })
+      )
+    )
+    await sendSqlMessage()
+    fireEvent.click(screen.getByRole('button', { name: /create dataset/i }))
+    await waitFor(() => screen.getByRole('dialog'))
+    fireEvent.change(screen.getByPlaceholderText(/name/i), { target: { value: 'My DS' } })
+    fireEvent.click(screen.getByRole('button', { name: /save/i }))
+    await waitFor(() => expect(screen.getByText(/dataset 'My DS' saved/i)).toBeInTheDocument())
+  })
+
+  it('should show View link in toast pointing to /datasets', async () => {
+    server.use(
+      http.post('/api/datasets', () =>
+        HttpResponse.json({ id: 'd-1', name: 'My DS', description: '', sql: 'SELECT 1',
+          snowflake_connection_id: 'sf-1', claude_connection_id: null,
+          models_used: [], created_by: 'u1', created_at: '', updated_at: '' }, { status: 201 })
+      )
+    )
+    await sendSqlMessage()
+    fireEvent.click(screen.getByRole('button', { name: /create dataset/i }))
+    await waitFor(() => screen.getByRole('dialog'))
+    fireEvent.change(screen.getByPlaceholderText(/name/i), { target: { value: 'My DS' } })
+    fireEvent.click(screen.getByRole('button', { name: /save/i }))
+    await waitFor(() => screen.getByRole('link', { name: /view/i }))
+    expect(screen.getByRole('link', { name: /view/i })).toHaveAttribute('href', '/datasets')
+  })
+
+  it('should auto-dismiss toast after 5 seconds', async () => {
+    // shouldAdvanceTime lets waitFor/MSW still work while we control setTimeout
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    server.use(
+      http.post('/api/datasets', () =>
+        HttpResponse.json({ id: 'd-1', name: 'My DS', description: '', sql: 'SELECT 1',
+          snowflake_connection_id: 'sf-1', claude_connection_id: null,
+          models_used: [], created_by: 'u1', created_at: '', updated_at: '' }, { status: 201 })
+      ),
+      http.post('/api/explore/chat', () =>
+        HttpResponse.json({ role: 'assistant', content: SQL_MSG })
+      )
+    )
+    renderStarted()
+    fireEvent.change(screen.getByPlaceholderText(/ask about your data/i), { target: { value: 'give me sql' } })
+    fireEvent.click(screen.getByRole('button', { name: /send/i }))
+    await waitFor(() => screen.getByRole('button', { name: /create dataset/i }))
+    fireEvent.click(screen.getByRole('button', { name: /create dataset/i }))
+    await waitFor(() => screen.getByRole('dialog'))
+    fireEvent.change(screen.getByPlaceholderText(/name/i), { target: { value: 'My DS' } })
+    fireEvent.click(screen.getByRole('button', { name: /save/i }))
+    await waitFor(() => screen.getByText(/dataset 'My DS' saved/i))
+    await act(async () => vi.advanceTimersByTime(5000))
+    expect(screen.queryByText(/dataset 'My DS' saved/i)).not.toBeInTheDocument()
+  })
+
+  it('should close DatasetDialog without showing toast when cancelled', async () => {
+    await sendSqlMessage()
+    fireEvent.click(screen.getByRole('button', { name: /create dataset/i }))
+    await waitFor(() => screen.getByRole('dialog'))
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' })
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    expect(screen.queryByText(/saved/i)).not.toBeInTheDocument()
   })
 })

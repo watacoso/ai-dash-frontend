@@ -7,6 +7,7 @@ export function DatasetsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [editingDataset, setEditingDataset] = useState<DatasetRow | null>(null)
 
   useEffect(() => {
     apiListDatasets()
@@ -20,11 +21,34 @@ export function DatasetsPage() {
     setDatasets((prev) => prev.filter((ds) => ds.id !== id))
   }
 
+  function handleOpen(ds: DatasetRow) {
+    setEditingDataset(ds)
+    setDialogOpen(true)
+  }
+
+  function handleClose() {
+    setDialogOpen(false)
+    setEditingDataset(null)
+  }
+
+  function handleSaved(ds: DatasetRow) {
+    setDatasets((prev) => {
+      const idx = prev.findIndex((d) => d.id === ds.id)
+      if (idx >= 0) {
+        const next = [...prev]
+        next[idx] = ds
+        return next
+      }
+      return [...prev, ds]
+    })
+    handleClose()
+  }
+
   return (
     <main>
       <div className="datasets-header">
         <h1>Datasets</h1>
-        <button onClick={() => setDialogOpen(true)}>Add dataset</button>
+        <button onClick={() => { setEditingDataset(null); setDialogOpen(true) }}>Add dataset</button>
       </div>
 
       {loading && <p>Loading…</p>}
@@ -51,7 +75,7 @@ export function DatasetsPage() {
                 <td>{ds.description}</td>
                 <td>{new Date(ds.created_at).toLocaleString()}</td>
                 <td className="datasets-actions">
-                  <button>Open</button>
+                  <button onClick={() => handleOpen(ds)}>Open</button>
                   <button onClick={() => handleDelete(ds.id)}>Delete</button>
                 </td>
               </tr>
@@ -62,11 +86,17 @@ export function DatasetsPage() {
 
       <DatasetDialog
         open={dialogOpen}
-        onClose={() => setDialogOpen(false)}
-        onSaved={(ds) => {
-          setDatasets(prev => [...prev, ds])
-          setDialogOpen(false)
-        }}
+        onClose={handleClose}
+        onSaved={handleSaved}
+        initialValues={editingDataset ? {
+          id: editingDataset.id,
+          name: editingDataset.name,
+          description: editingDataset.description,
+          sql: editingDataset.sql,
+          snowflake_connection_id: editingDataset.snowflake_connection_id,
+          claude_connection_id: editingDataset.claude_connection_id,
+          models_used: editingDataset.models_used,
+        } : undefined}
       />
     </main>
   )

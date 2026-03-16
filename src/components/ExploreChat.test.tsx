@@ -230,4 +230,44 @@ describe('ExploreChat', () => {
     fireEvent.click(screen.getByRole('button', { name: /clear/i }))
     expect(onClearLogs).toHaveBeenCalledOnce()
   })
+
+  // --- TKT-0030: Create dataset button ---
+
+  it('should not show Create dataset button on user message', () => {
+    const msgs = [{ role: 'user', content: '```sql\nSELECT 1\n```' }]
+    render(<ExploreChat messages={msgs} loading={false} onSend={vi.fn()} connectionId="sf-1" onCreateDataset={vi.fn()} />)
+    expect(screen.queryByRole('button', { name: /create dataset/i })).not.toBeInTheDocument()
+  })
+
+  it('should not show Create dataset button on assistant message without SQL', () => {
+    const msgs = [{ role: 'assistant', content: 'Here is some plain text.' }]
+    render(<ExploreChat messages={msgs} loading={false} onSend={vi.fn()} connectionId="sf-1" onCreateDataset={vi.fn()} />)
+    expect(screen.queryByRole('button', { name: /create dataset/i })).not.toBeInTheDocument()
+  })
+
+  it('should show Create dataset button on assistant message with tagged sql block', () => {
+    const msgs = [{ role: 'assistant', content: '```sql\nSELECT 1\n```' }]
+    render(<ExploreChat messages={msgs} loading={false} onSend={vi.fn()} connectionId="sf-1" onCreateDataset={vi.fn()} />)
+    expect(screen.getByRole('button', { name: /create dataset/i })).toBeInTheDocument()
+  })
+
+  it('should show Create dataset button on assistant message with single untagged code block', () => {
+    const msgs = [{ role: 'assistant', content: '```\nSELECT 1\n```' }]
+    render(<ExploreChat messages={msgs} loading={false} onSend={vi.fn()} connectionId="sf-1" onCreateDataset={vi.fn()} />)
+    expect(screen.getByRole('button', { name: /create dataset/i })).toBeInTheDocument()
+  })
+
+  it('should show Create dataset button for each code block when multiple blocks present', () => {
+    const msgs = [{ role: 'assistant', content: '```\nSELECT 1\n```\n\n```\nSELECT 2\n```' }]
+    render(<ExploreChat messages={msgs} loading={false} onSend={vi.fn()} connectionId="sf-1" onCreateDataset={vi.fn()} />)
+    expect(screen.getAllByRole('button', { name: /create dataset/i })).toHaveLength(2)
+  })
+
+  it('should call onCreateDataset with extracted sql when Create dataset clicked', () => {
+    const onCreateDataset = vi.fn()
+    const msgs = [{ role: 'assistant', content: '```sql\nSELECT 1\n```' }]
+    render(<ExploreChat messages={msgs} loading={false} onSend={vi.fn()} connectionId="sf-1" onCreateDataset={onCreateDataset} />)
+    fireEvent.click(screen.getByRole('button', { name: /create dataset/i }))
+    expect(onCreateDataset).toHaveBeenCalledWith('SELECT 1')
+  })
 })
