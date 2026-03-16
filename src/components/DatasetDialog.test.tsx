@@ -169,4 +169,187 @@ describe('DatasetDialog', () => {
     expect(screen.getByPlaceholderText(/description/i)).toHaveValue('Some desc')
     expect(screen.getByPlaceholderText(/sql/i)).toHaveValue('SELECT id FROM t')
   })
+
+  // --- Run panel tests ---
+
+  const runResponse = {
+    columns: ['id', 'name'],
+    rows: [['1', 'Alice']],
+    row_count: 1,
+    duration_ms: 42,
+    executed_at: '2026-03-16T10:00:00Z',
+  }
+
+  const withRunReady = {
+    initialValues: {
+      name: '',
+      description: '',
+      sql: 'SELECT 1',
+      snowflake_connection_id: 'sf-1',
+      claude_connection_id: null as string | null,
+      models_used: [] as string[],
+    },
+  }
+
+  it('should render Run button', async () => {
+    renderDialog(withRunReady)
+    await waitFor(() => screen.getByRole('dialog'))
+    expect(screen.getByRole('button', { name: /^run$/i })).toBeInTheDocument()
+  })
+
+  it('should disable Run when sql is empty', async () => {
+    renderDialog({ initialValues: { ...withRunReady.initialValues, sql: '' } })
+    await waitFor(() => screen.getByRole('dialog'))
+    expect(screen.getByRole('button', { name: /^run$/i })).toBeDisabled()
+  })
+
+  it('should disable Run when snowflake_connection_id not selected', async () => {
+    renderDialog({ initialValues: { ...withRunReady.initialValues, snowflake_connection_id: '' } })
+    await waitFor(() => screen.getByRole('dialog'))
+    expect(screen.getByRole('button', { name: /^run$/i })).toBeDisabled()
+  })
+
+  it('should show spinner and disable Run while request in-flight', async () => {
+    let resolve!: (v: unknown) => void
+    server.use(
+      http.post('/api/datasets/run', () => new Promise(r => { resolve = r }))
+    )
+    renderDialog(withRunReady)
+    await waitFor(() => screen.getByRole('dialog'))
+    fireEvent.click(screen.getByRole('button', { name: /^run$/i }))
+    await waitFor(() => expect(screen.getByRole('status')).toBeInTheDocument())
+    expect(screen.getByRole('button', { name: /^run$/i })).toBeDisabled()
+    resolve(HttpResponse.json(runResponse))
+    await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument())
+  })
+
+  it('should show Cancel button only while request in-flight', async () => {
+    let resolve!: (v: unknown) => void
+    server.use(
+      http.post('/api/datasets/run', () => new Promise(r => { resolve = r }))
+    )
+    renderDialog(withRunReady)
+    await waitFor(() => screen.getByRole('dialog'))
+    expect(screen.queryByRole('button', { name: /cancel/i })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /^run$/i }))
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /cancel/i })).toBeInTheDocument()
+    )
+    resolve(HttpResponse.json(runResponse))
+    await waitFor(() => expect(screen.queryByRole('button', { name: /cancel/i })).not.toBeInTheDocument())
+  })
+
+  it('should abort request and hide Cancel when Cancel clicked', async () => {
+    server.use(
+      http.post('/api/datasets/run', () => new Promise(() => {}))
+    )
+    renderDialog(withRunReady)
+    await waitFor(() => screen.getByRole('dialog'))
+    fireEvent.click(screen.getByRole('button', { name: /^run$/i }))
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /cancel/i })).toBeInTheDocument()
+    )
+    fireEvent.click(screen.getByRole('button', { name: /cancel/i }))
+    await waitFor(() =>
+      expect(screen.queryByRole('button', { name: /cancel/i })).not.toBeInTheDocument()
+    )
+  })
+
+  it('should render results table with column headers and rows on success', async () => {
+    server.use(
+      http.post('/api/datasets/run', () => HttpResponse.json(runResponse))
+    )
+    renderDialog(withRunReady)
+    await waitFor(() => screen.getByRole('dialog'))
+    fireEvent.click(screen.getByRole('button', { name: /^run$/i }))
+    await waitFor(() => expect(screen.getByRole('table')).toBeInTheDocument())
+    expect(screen.getByRole('columnheader', { name: 'id' })).toBeInTheDocument()
+    expect(screen.getByRole('columnheader', { name: 'name' })).toBeInTheDocument()
+    expect(screen.getByRole('cell', { name: '1' })).toBeInTheDocument()
+    expect(screen.getByRole('cell', { name: 'Alice' })).toBeInTheDocument()
+  })
+
+  it('should show metadata bar with row count, duration and executed_at on success', async () => {
+    server.use(
+      http.post('/api/datasets/run', () => HttpResponse.json(runResponse))
+    )
+    renderDialog(withRunReady)
+    await waitFor(() => screen.getByRole('dialog'))
+    fireEvent.click(screen.getByRole('button', { name: /^run$/i }))
+    await waitFor(() => expect(screen.getByTestId('run-metadata')).toBeInTheDocument())
+    const meta = screen.getByTestId('run-metadata')
+    expect(meta).toHaveTextContent('1')
+    expect(meta).toHaveTextContent('2026-03-16')
+  })
+
+  it('should show inline error and clear table on Snowflake error (422)', async () => {
+    server.use(
+      http.post('/api/datasets/run', () =>
+        HttpResponse.json({ error: 'bad sql' }, { status: 422 })
+      )
+    )
+    renderDialog(withRunReady)
+    await waitFor(() => screen.getByRole('dialog'))
+    fireEvent.click(screen.getByRole('button', { name: /^run$/i }))
+    await waitFor(() => expect(screen.getByTestId('run-error')).toBeInTheDocument())
+    expect(screen.getByTestId('run-error')).toHaveTextContent('bad sql')
+    expect(screen.queryByRole('table')).not.toBeInTheDocument()
+  })
+
+  it('should use POST /datasets/run when no dataset id', async () => {
+    let adhocCalled = false
+    server.use(
+      http.post('/api/datasets/run', () => {
+        adhocCalled = true
+        return HttpResponse.json(runResponse)
+      })
+    )
+    renderDialog(withRunReady)
+    await waitFor(() => screen.getByRole('dialog'))
+    fireEvent.click(screen.getByRole('button', { name: /^run$/i }))
+    await waitFor(() => expect(adhocCalled).toBe(true))
+  })
+
+  it('should use POST /datasets/{id}/run when dataset has been saved', async () => {
+    let savedCalled = false
+    server.use(
+      http.post('/api/datasets/ds-1/run', () => {
+        savedCalled = true
+        return HttpResponse.json(runResponse)
+      })
+    )
+    renderDialog({
+      initialValues: { id: 'ds-1', name: '', description: '', sql: 'SELECT 1', snowflake_connection_id: 'sf-1', claude_connection_id: null, models_used: [] },
+    })
+    await waitFor(() => screen.getByRole('dialog'))
+    fireEvent.click(screen.getByRole('button', { name: /^run$/i }))
+    await waitFor(() => expect(savedCalled).toBe(true))
+  })
+
+  it('should clear previous results when a new run starts', async () => {
+    let callCount = 0
+    let resolveFirst!: (v: unknown) => void
+    let resolveSecond!: (v: unknown) => void
+    server.use(
+      http.post('/api/datasets/run', () => {
+        callCount++
+        if (callCount === 1) return new Promise(r => { resolveFirst = r })
+        return new Promise(r => { resolveSecond = r })
+      })
+    )
+    renderDialog(withRunReady)
+    await waitFor(() => screen.getByRole('dialog'))
+
+    // First run — succeeds
+    fireEvent.click(screen.getByRole('button', { name: /^run$/i }))
+    await waitFor(() => expect(resolveFirst).toBeDefined())
+    resolveFirst(HttpResponse.json(runResponse))
+    await waitFor(() => expect(screen.getByRole('table')).toBeInTheDocument())
+
+    // Second run — results cleared immediately
+    fireEvent.click(screen.getByRole('button', { name: /^run$/i }))
+    await waitFor(() => expect(screen.queryByRole('table')).not.toBeInTheDocument())
+    resolveSecond(HttpResponse.json(runResponse))
+    await waitFor(() => expect(screen.getByRole('table')).toBeInTheDocument())
+  })
 })
