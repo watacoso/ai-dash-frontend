@@ -5,8 +5,8 @@ import { RoleGuard } from './auth/RoleGuard'
 import { LoginPage } from './pages/LoginPage'
 import { AdminPage } from './pages/AdminPage'
 import { SettingsPage } from './pages/SettingsPage'
+import { DatasetsPage } from './pages/DatasetsPage'
 import { ExplorePage } from './pages/ExplorePage'
-import { QueryPage } from './pages/QueryPage'
 import { SessionProvider } from './context/SessionContext'
 import { Nav } from './components/Nav'
 
@@ -73,10 +73,10 @@ export function App() {
               }
             />
             <Route
-              path="/query"
+              path="/datasets"
               element={
                 <ProtectedRoute>
-                  <AppLayout><QueryPage /></AppLayout>
+                  <AppLayout><DatasetsPage /></AppLayout>
                 </ProtectedRoute>
               }
             />
