@@ -3,26 +3,61 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --color-bg:         #f8f9fa;
-  --color-surface:    #ffffff;
-  --color-border:     #dee2e6;
-  --color-text:       #212529;
-  --color-text-muted: #6c757d;
-  --color-accent:     #4361ee;
-  --color-accent-dim: #3451d1;
-  --color-user-bg:    #4361ee;
-  --color-user-text:  #ffffff;
-  --color-ai-bg:      #f1f3f5;
-  --color-ai-text:    #212529;
-  --color-error:      #c0392b;
-  --radius:           6px;
-  --shadow:           0 1px 4px rgba(0,0,0,.08);
+  /* Colour */
+  --color-bg:           #f8f9fa;
+  --color-surface:      #ffffff;
+  --color-border:       #dee2e6;
+  --color-text:         #212529;
+  --color-text-muted:   #6c757d;
+  --color-accent:       #4361ee;
+  --color-accent-dim:   #3451d1;
+  --color-accent-tint:  #eef1fd;
+  --color-accent-border:#c7d2fc;
+  --color-user-bg:      #4361ee;
+  --color-user-text:    #ffffff;
+  --color-ai-bg:        #f1f3f5;
+  --color-ai-text:      #212529;
+  --color-error:        #c0392b;
+  --color-error-tint:   #fff5f5;
+  --color-success:      #2d6a4f;
+
+  /* Typography */
+  --font-family:          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-family-mono:     'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  --font-size-xs:         0.75rem;
+  --font-size-sm:         0.875rem;
+  --font-size-base:       1rem;
+  --font-size-lg:         1.2rem;
+  --font-size-xl:         1.5rem;
+  --font-weight-normal:   400;
+  --font-weight-medium:   500;
+  --font-weight-semibold: 600;
+  --font-weight-bold:     700;
+
+  /* Spacing (4px base scale) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-7: 1.75rem;
+  --space-8: 2rem;
+
+  /* Border radius */
+  --radius-sm: 3px;
+  --radius-md: 6px;
+  --radius-lg: 0.5rem;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 4px rgba(0,0,0,.08);
+  --shadow-md: 0 4px 16px rgba(0,0,0,.12);
 }
 
 html, body, #root {
   height: 100%;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 16px;
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
   color: var(--color-text);
   background: var(--color-bg);
   line-height: 1.5;
@@ -30,8 +65,8 @@ html, body, #root {
 
 /* ── Typography ─────────────────────────────────────────────────────────────── */
 
-h1 { font-size: 1.5rem; font-weight: 600; margin-bottom: .75rem; }
-h2 { font-size: 1.2rem; font-weight: 600; margin-bottom: .5rem; }
+h1 { font-size: var(--font-size-xl); font-weight: var(--font-weight-semibold); margin-bottom: .75rem; }
+h2 { font-size: var(--font-size-lg); font-weight: var(--font-weight-semibold); margin-bottom: .5rem; }
 p  { margin-bottom: .5rem; color: var(--color-text-muted); }
 
 /* ── Buttons ────────────────────────────────────────────────────────────────── */
@@ -44,9 +79,9 @@ button {
   font-size: .9rem;
   font-weight: 500;
   border: 1px solid var(--color-accent);
-  border-radius: var(--radius);
+  border-radius: var(--radius-md);
   background: var(--color-accent);
-  color: #fff;
+  color: var(--color-surface);
   cursor: pointer;
   transition: background .15s, border-color .15s, opacity .15s;
 }
@@ -77,7 +112,7 @@ input, textarea, select {
   padding: .45rem .7rem;
   font-size: .9rem;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-md);
   background: var(--color-surface);
   color: var(--color-text);
   transition: border-color .15s;
@@ -97,7 +132,7 @@ textarea { resize: vertical; min-height: 80px; }
   z-index: 100;
   background: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-sm);
 }
 .app-nav-inner {
   display: flex;
@@ -122,11 +157,11 @@ textarea { resize: vertical; min-height: 80px; }
   font-weight: 500;
   color: var(--color-text-muted);
   text-decoration: none;
-  border-radius: var(--radius);
+  border-radius: var(--radius-md);
   transition: color .15s, background .15s;
 }
 .app-nav nav a:hover { color: var(--color-text); background: var(--color-bg); }
-.app-nav nav a.active { color: var(--color-accent); background: #eef1fd; }
+.app-nav nav a.active { color: var(--color-accent); background: var(--color-accent-tint); }
 
 /* ── Page layout ────────────────────────────────────────────────────────────── */
 
@@ -147,11 +182,11 @@ textarea { resize: vertical; min-height: 80px; }
 .login-card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-md);
   padding: 2rem;
   width: 100%;
   max-width: 380px;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -170,11 +205,11 @@ textarea { resize: vertical; min-height: 80px; }
 .session-card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-md);
   padding: 2rem;
   width: 100%;
   max-width: 440px;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
@@ -203,7 +238,7 @@ textarea { resize: vertical; min-height: 80px; }
   flex-shrink: 0;
   height: calc(100vh - 52px - 4rem);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-md);
   background: var(--color-surface);
   display: flex;
   flex-direction: column;
@@ -243,12 +278,12 @@ textarea { resize: vertical; min-height: 80px; }
   gap: .5rem;
   padding: .35rem .75rem;
   font-size: .78rem;
-  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-family: var(--font-family-mono);
   border-bottom: 1px solid var(--color-border);
 }
 .debug-entry[data-level="ERROR"] {
-  color: #c0392b;
-  background: #fff5f5;
+  color: var(--color-error);
+  background: var(--color-error-tint);
 }
 .debug-entry__level {
   font-weight: 700;
@@ -259,7 +294,7 @@ textarea { resize: vertical; min-height: 80px; }
   word-break: break-all;
 }
 .btn-secondary--active {
-  background: #eef1fd;
+  background: var(--color-accent-tint);
   color: var(--color-accent);
   border-color: var(--color-accent);
 }
@@ -274,7 +309,7 @@ textarea { resize: vertical; min-height: 80px; }
 .chat-bubble {
   max-width: 72%;
   padding: .6rem .9rem;
-  border-radius: var(--radius);
+  border-radius: var(--radius-md);
   font-size: .9rem;
   line-height: 1.5;
   white-space: pre-wrap;
@@ -311,16 +346,16 @@ textarea { resize: vertical; min-height: 80px; }
 .chat-bubble[data-role="assistant"] hr     { border: none; border-top: 1px solid var(--color-border); margin: .75rem 0; }
 
 .chat-bubble[data-role="assistant"] code {
-  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-family: var(--font-family-mono);
   font-size: .82em;
   background: rgba(0,0,0,.07);
-  border-radius: 3px;
+  border-radius: var(--radius-sm);
   padding: .1em .35em;
 }
 .chat-bubble[data-role="assistant"] pre {
   background: rgba(0,0,0,.07);
-  border-radius: var(--radius);
-  padding: .6rem .8rem;
+  border-radius: var(--radius-md);
+  padding: var(--space-2) .8rem;
   overflow-x: auto;
   margin-bottom: .5rem;
 }
@@ -333,7 +368,7 @@ textarea { resize: vertical; min-height: 80px; }
 .chat-bubble[data-role="assistant"] table {
   font-size: .85rem;
   margin-bottom: .5rem;
-  border-radius: var(--radius);
+  border-radius: var(--radius-md);
   overflow: hidden;
 }
 .chat-bubble[data-role="assistant"] th {
@@ -369,7 +404,7 @@ textarea { resize: vertical; min-height: 80px; }
   font-size: .8rem;
   padding: .3rem .75rem;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-md);
   background: var(--color-surface);
   color: var(--color-text-muted);
   cursor: pointer;
@@ -411,8 +446,8 @@ textarea { resize: vertical; min-height: 80px; }
   list-style: none;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  box-shadow: 0 4px 20px rgba(0,0,0,.13);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
   overflow: hidden;
   max-height: 260px;
   overflow-y: auto;
@@ -423,7 +458,7 @@ textarea { resize: vertical; min-height: 80px; }
   gap: .5rem;
   padding: .45rem .75rem;
   font-size: .85rem;
-  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-family: var(--font-family-mono);
   cursor: pointer;
   color: var(--color-text);
   border-bottom: 1px solid var(--color-border);
@@ -432,7 +467,7 @@ textarea { resize: vertical; min-height: 80px; }
 .autocomplete-option:last-child { border-bottom: none; }
 .autocomplete-option:hover,
 .autocomplete-option--active {
-  background: #eef1fd;
+  background: var(--color-accent-tint);
   color: var(--color-accent);
 }
 .autocomplete-option__name { flex: 1; }
@@ -445,13 +480,13 @@ textarea { resize: vertical; min-height: 80px; }
   color: var(--color-text-muted);
   background: var(--color-bg);
   border: 1px solid var(--color-border);
-  border-radius: 3px;
+  border-radius: var(--radius-sm);
   padding: .1rem .35rem;
 }
 .autocomplete-option--active .autocomplete-option__type {
   color: var(--color-accent);
-  border-color: #c7d2fc;
-  background: #eef1fd;
+  border-color: var(--color-accent-border);
+  background: var(--color-accent-tint);
 }
 
 /* ── Tables ─────────────────────────────────────────────────────────────────── */
@@ -469,9 +504,9 @@ tr:last-child td { border-bottom: none; }
 .card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-md);
   padding: 1.5rem;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-sm);
 }
 
 /* ── Query page ─────────────────────────────────────────────────────────────── */
@@ -479,19 +514,19 @@ tr:last-child td { border-bottom: none; }
 .query-wrap { display: flex; gap: 1.5rem; height: calc(100vh - 9rem); }
 .chat { flex: 1; display: flex; flex-direction: column; gap: .75rem; }
 .chat-messages { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: .5rem; }
-.chat-bubble { max-width: 80%; padding: .6rem .9rem; border-radius: var(--radius);
+.chat-bubble { max-width: 80%; padding: .6rem .9rem; border-radius: var(--radius-md);
                border: 1px solid var(--color-border); white-space: pre-wrap; }
 .chat-bubble[data-role='user'] { align-self: flex-end; background: var(--color-accent);
-                                  color: #fff; border-color: var(--color-accent); }
+                                  color: var(--color-surface); border-color: var(--color-accent); }
 .chat-bubble[data-role='assistant'] { align-self: flex-start; background: var(--color-surface); }
 .chat-thinking { align-self: flex-start; color: var(--color-text-muted); font-style: italic;
                  font-size: .875rem; }
 .chat-input-row { display: flex; gap: .5rem; }
 .chat-input-row textarea { flex: 1; min-height: 3rem; max-height: 10rem; resize: vertical;
                             padding: .5rem .75rem; border: 1px solid var(--color-border);
-                            border-radius: var(--radius); font-family: inherit; font-size: .9rem; }
+                            border-radius: var(--radius-md); font-family: inherit; font-size: .9rem; }
 .query-sidebar { width: 22rem; flex-shrink: 0; background: var(--color-surface);
-                 border: 1px solid var(--color-border); border-radius: var(--radius);
+                 border: 1px solid var(--color-border); border-radius: var(--radius-md);
                  overflow-y: auto; }
 
 /* ── Datasets page ──────────────────────────────────────────────────────────── */
@@ -517,10 +552,10 @@ tr:last-child td { border-bottom: none; }
 }
 .dataset-dialog-header-fields { display: flex; align-items: center; gap: .75rem; flex: 1; min-width: 0; }
 .dataset-dialog-name { font-size: 1rem; font-weight: 600; border: 1px solid transparent;
-  border-radius: var(--radius); padding: .25rem .5rem; background: transparent; }
+  border-radius: var(--radius-md); padding: .25rem .5rem; background: transparent; }
 .dataset-dialog-name:focus { border-color: var(--color-border); background: var(--color-surface); outline: none; }
 .dataset-dialog-description { font-size: .875rem; color: var(--color-text-muted);
-  border: 1px solid transparent; border-radius: var(--radius); padding: .25rem .5rem;
+  border: 1px solid transparent; border-radius: var(--radius-md); padding: .25rem .5rem;
   background: transparent; flex: 1; min-width: 0; }
 .dataset-dialog-description:focus { border-color: var(--color-border); background: var(--color-surface); outline: none; }
 .dataset-dialog-models-badge {
@@ -559,7 +594,7 @@ tr:last-child td { border-bottom: none; }
 .run-toggle-btn {
   margin-left: auto; background: none; border: none; cursor: pointer;
   color: var(--color-text-muted); font-size: .7rem; padding: .25rem .4rem;
-  border-radius: var(--radius); line-height: 1;
+  border-radius: var(--radius-md); line-height: 1;
 }
 .run-toggle-btn:hover { background: var(--color-surface); color: var(--color-text); }
 .run-spinner {
@@ -606,7 +641,7 @@ tr:last-child td { border-bottom: none; }
 .explore-toast {
   position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
   background: var(--color-surface); border: 1px solid var(--color-border);
-  border-radius: .5rem; padding: .6rem 1.25rem; font-size: .875rem;
+  border-radius: var(--radius-lg); padding: .6rem 1.25rem; font-size: .875rem;
   box-shadow: 0 4px 16px rgba(0,0,0,.12); z-index: 200;
   display: flex; align-items: center; gap: .75rem;
 }
@@ -616,8 +651,8 @@ tr:last-child td { border-bottom: none; }
 /* TKT-0032 — Dataset dialog chat panel */
 .dataset-dialog-chat { display: flex; flex-direction: column; height: 100%; }
 .dataset-dialog-chat-messages { flex: 1; overflow-y: auto; padding: .75rem; display: flex; flex-direction: column; gap: .5rem; }
-.dataset-chat-bubble { padding: .5rem .75rem; border-radius: var(--radius); font-size: .875rem; line-height: 1.5; }
-.dataset-chat-bubble[data-role="user"] { background: var(--color-accent); color: #fff; align-self: flex-end; max-width: 85%; }
+.dataset-chat-bubble { padding: .5rem .75rem; border-radius: var(--radius-md); font-size: .875rem; line-height: 1.5; }
+.dataset-chat-bubble[data-role="user"] { background: var(--color-accent); color: var(--color-surface); align-self: flex-end; max-width: 85%; }
 .dataset-chat-bubble[data-role="assistant"] { background: var(--color-ai-bg); color: var(--color-ai-text); align-self: flex-start; max-width: 95%; }
 .dataset-chat-thinking { font-size: .8rem; color: var(--color-text-muted); padding: .25rem .75rem; }
 .dataset-dialog-chat-input { display: flex; gap: .5rem; padding: .5rem; border-top: 1px solid var(--color-border); }
