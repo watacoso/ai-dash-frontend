@@ -6,6 +6,7 @@ import { LoginPage } from './pages/LoginPage'
 import { AdminPage } from './pages/AdminPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { DatasetsPage } from './pages/DatasetsPage'
+import { ChartsPage } from './pages/ChartsPage'
 import { ExplorePage } from './pages/ExplorePage'
 import { SessionProvider } from './context/SessionContext'
 import { Nav } from './components/Nav'
@@ -79,6 +80,14 @@ export function App() {
               element={
                 <ProtectedRoute>
                   <AppLayout><DatasetsPage /></AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/charts"
+              element={
+                <ProtectedRoute>
+                  <AppLayout><ChartsPage /></AppLayout>
                 </ProtectedRoute>
               }
             />
