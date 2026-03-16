@@ -52,8 +52,13 @@ describe('Nav', () => {
     expect(screen.getByRole('link', { name: /explore/i })).toBeInTheDocument()
   })
 
-  it('should render a Query nav link for analyst', () => {
+  it('should render a Datasets nav link for analyst', () => {
     renderNav('analyst')
-    expect(screen.getByRole('link', { name: /query/i })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /datasets/i })).toBeInTheDocument()
+  })
+
+  it('should not render a Query nav link', () => {
+    renderNav('analyst')
+    expect(screen.queryByRole('link', { name: /^query$/i })).not.toBeInTheDocument()
   })
 })

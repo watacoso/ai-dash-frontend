@@ -493,3 +493,10 @@ tr:last-child td { border-bottom: none; }
 .query-sidebar { width: 22rem; flex-shrink: 0; background: var(--color-surface);
                  border: 1px solid var(--color-border); border-radius: var(--radius);
                  overflow-y: auto; }
+
+/* ── Datasets page ──────────────────────────────────────────────────────────── */
+
+.datasets-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+.datasets-header h1 { margin: 0; }
+.datasets-actions { display: flex; gap: .5rem; white-space: nowrap; }
+.empty-state { color: var(--color-text-muted); margin-top: 2rem; text-align: center; }

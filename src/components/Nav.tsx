@@ -10,7 +10,7 @@ export function Nav() {
         <nav>
           <NavLink to="/" end>Home</NavLink>
           {role && <NavLink to="/explore">Explore</NavLink>}
-          {role && <NavLink to="/query">Query</NavLink>}
+          {role && <NavLink to="/datasets">Datasets</NavLink>}
           {role === 'admin' && <NavLink to="/admin">Admin</NavLink>}
           {role === 'admin' && <NavLink to="/settings/connections">Settings</NavLink>}
         </nav>
