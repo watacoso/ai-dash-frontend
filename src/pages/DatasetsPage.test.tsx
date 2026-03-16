@@ -126,4 +126,11 @@ describe('DatasetsPage', () => {
     renderPage()
     expect(screen.getByRole('button', { name: /add dataset/i })).toBeInTheDocument()
   })
+
+  it('should open DatasetDialog when Add dataset clicked', async () => {
+    server.use(http.get('/api/connections', () => HttpResponse.json([])))
+    renderPage()
+    fireEvent.click(screen.getByRole('button', { name: /add dataset/i }))
+    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument())
+  })
 })
