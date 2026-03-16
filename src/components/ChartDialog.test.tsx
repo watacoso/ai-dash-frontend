@@ -157,4 +157,14 @@ describe('ChartDialog', () => {
     await waitFor(() => expect(screen.getByTestId('chat-spinner')).toBeInTheDocument())
     resolve(HttpResponse.json({ role: 'assistant', content: 'ok', d3_code_update: null }))
   })
+
+  it('should render D3Preview inside dialog', async () => {
+    // Arrange — open with d3_code set
+    renderDialog({
+      initialValues: { id: 'ch-1', name: 'My chart', datasource_id: 'ds-1', d3_code: "d3.select('svg');", versions: [] },
+    })
+    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument())
+    // Assert — iframe (live preview) present
+    expect(document.querySelector('iframe')).toBeInTheDocument()
+  })
 })

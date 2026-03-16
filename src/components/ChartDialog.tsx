@@ -4,6 +4,7 @@ import remarkGfm from 'remark-gfm'
 import { ConnectionRow, apiListConnections } from '../api/connections'
 import { ChartRow } from '../api/charts'
 import { DatasetRow, apiListDatasets } from '../api/datasets'
+import { D3Preview } from './D3Preview'
 
 interface ChatMsg { role: string; content: string }
 
@@ -156,10 +157,7 @@ export function ChartDialog({ open, onClose, onSaved, initialValues }: Props) {
               value={d3Code}
               onChange={e => setD3Code(e.target.value)}
             />
-            <div className="chart-dialog-preview-placeholder">
-              {/* D3 SVG preview — filled in TKT-0042 */}
-              <span>Preview coming soon</span>
-            </div>
+            <D3Preview d3Code={d3Code} />
           </div>
 
           <div className="chart-dialog-right">
