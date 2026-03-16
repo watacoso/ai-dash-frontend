@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ConnectionRow, apiListConnections } from '../api/connections'
 import { DatasetRow } from '../api/datasets'
 
@@ -26,6 +26,14 @@ function formatModelsUsed(models: string[]): string {
   return `${models[0]} and ${models.length - 1} others`
 }
 
+interface RunResult {
+  columns: string[]
+  rows: string[][]
+  row_count: number
+  duration_ms: number
+  executed_at: string
+}
+
 async function authFetch(url: string, options: RequestInit = {}) {
   const res = await fetch(url, {
     ...options,
@@ -44,10 +52,15 @@ export function DatasetDialog({ open, onClose, onSaved, initialValues }: Props) 
   const [snowflakeId, setSnowflakeId] = useState(initialValues?.snowflake_connection_id ?? '')
   const [claudeId, setClaudeId] = useState(initialValues?.claude_connection_id ?? '')
   const [saving, setSaving] = useState(false)
+  const [running, setRunning] = useState(false)
+  const [runResult, setRunResult] = useState<RunResult | null>(null)
+  const [runError, setRunError] = useState<string | null>(null)
+  const cancelledRef = useRef(false)
 
   const modelsUsed = initialValues?.models_used ?? []
   const isEditMode = !!initialValues?.id
   const canSave = name.trim() !== '' && sql.trim() !== '' && snowflakeId !== ''
+  const canRun = sql.trim() !== '' && snowflakeId !== ''
 
   useEffect(() => {
     if (open) apiListConnections().then(setConnections)
@@ -64,6 +77,42 @@ export function DatasetDialog({ open, onClose, onSaved, initialValues }: Props) 
 
   function handleKeyDown(e: React.KeyboardEvent) {
     if (e.key === 'Escape') onClose()
+  }
+
+  function handleCancel() {
+    cancelledRef.current = true
+    setRunning(false)
+  }
+
+  async function handleRun() {
+    if (!canRun || running) return
+    setRunResult(null)
+    setRunError(null)
+    setRunning(true)
+    cancelledRef.current = false
+    const url = initialValues?.id
+      ? `/api/datasets/${initialValues.id}/run`
+      : '/api/datasets/run'
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: initialValues?.id ? undefined : JSON.stringify({ sql, snowflake_connection_id: snowflakeId }),
+      })
+      if (cancelledRef.current) return
+      if (res.ok) {
+        const data = await res.json()
+        setRunResult(data)
+      } else {
+        const data = await res.json()
+        setRunError(data.error ?? `Error ${res.status}`)
+      }
+    } catch {
+      if (!cancelledRef.current) setRunError('Request failed')
+    } finally {
+      if (!cancelledRef.current) setRunning(false)
+    }
   }
 
   async function handleSave() {
@@ -143,7 +192,33 @@ export function DatasetDialog({ open, onClose, onSaved, initialValues }: Props) 
               value={sql}
               onChange={e => setSql(e.target.value)}
             />
-            <div className="dataset-dialog-run-placeholder" data-testid="dialog-run-placeholder" />
+            <div className="dataset-dialog-run-panel">
+              <div className="dataset-dialog-run-bar">
+                <button onClick={handleRun} disabled={!canRun || running}>Run</button>
+                {running && <button onClick={handleCancel}>Cancel</button>}
+              </div>
+              {running && <div role="status" className="run-spinner">Loading…</div>}
+              {runError && <p data-testid="run-error" className="run-error">{runError}</p>}
+              {runResult && (
+                <div className="run-results">
+                  <div data-testid="run-metadata" className="run-metadata">
+                    {runResult.row_count} rows · {runResult.duration_ms}ms · {runResult.executed_at}
+                  </div>
+                  <div className="run-results-scroll">
+                    <table>
+                      <thead>
+                        <tr>{runResult.columns.map(col => <th key={col}>{col}</th>)}</tr>
+                      </thead>
+                      <tbody>
+                        {runResult.rows.map((row, i) => (
+                          <tr key={i}>{row.map((cell, j) => <td key={j}>{String(cell)}</td>)}</tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
           <div className="dataset-dialog-right">
             <div className="dataset-dialog-chat-placeholder" data-testid="dialog-chat-placeholder" />
