@@ -6,6 +6,7 @@ import { LoginPage } from './pages/LoginPage'
 import { AdminPage } from './pages/AdminPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { ExplorePage } from './pages/ExplorePage'
+import { QueryPage } from './pages/QueryPage'
 import { SessionProvider } from './context/SessionContext'
 import { Nav } from './components/Nav'
 
@@ -68,6 +69,14 @@ export function App() {
               element={
                 <ProtectedRoute>
                   <AppLayout><ExplorePage /></AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/query"
+              element={
+                <ProtectedRoute>
+                  <AppLayout><QueryPage /></AppLayout>
                 </ProtectedRoute>
               }
             />
