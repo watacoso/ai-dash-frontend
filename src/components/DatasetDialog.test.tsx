@@ -95,10 +95,10 @@ describe('DatasetDialog', () => {
     expect(screen.getByPlaceholderText(/sql/i)).toBeInTheDocument()
   })
 
-  it('should render Chat placeholder in right column', async () => {
+  it('should render chat panel in right column', async () => {
     renderDialog()
     await waitFor(() => screen.getByRole('dialog'))
-    expect(screen.getByTestId('dialog-chat-placeholder')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText(/ask the ai/i)).toBeInTheDocument()
   })
 
   it('should disable Save when name is empty', async () => {
@@ -351,5 +351,147 @@ describe('DatasetDialog', () => {
     await waitFor(() => expect(screen.queryByRole('table')).not.toBeInTheDocument())
     resolveSecond(HttpResponse.json(runResponse))
     await waitFor(() => expect(screen.getByRole('table')).toBeInTheDocument())
+  })
+})
+
+// ── TKT-0032: Chat panel ───────────────────────────────────────────────────────
+
+const withChat = {
+  initialValues: {
+    name: '',
+    description: '',
+    sql: 'SELECT 1',
+    snowflake_connection_id: 'sf-1',
+    claude_connection_id: 'cl-1',
+    models_used: [] as string[],
+  },
+}
+
+const withChatSaved = {
+  initialValues: {
+    id: 'ds-1',
+    name: 'My DS',
+    description: '',
+    sql: 'SELECT 1',
+    snowflake_connection_id: 'sf-1',
+    claude_connection_id: 'cl-1',
+    models_used: [] as string[],
+  },
+}
+
+describe('DatasetDialog — chat panel', () => {
+  beforeEach(() => {
+    server.use(http.get('/api/connections', () => HttpResponse.json([sfConn, clConn])))
+  })
+
+  it('should render chat input and send button in right column', async () => {
+    renderDialog(withChat)
+    await waitFor(() => screen.getByRole('dialog'))
+    expect(screen.getByPlaceholderText(/ask the ai/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /send/i })).toBeInTheDocument()
+  })
+
+  it('should disable send button when chat input is empty', async () => {
+    renderDialog(withChat)
+    await waitFor(() => screen.getByRole('dialog'))
+    expect(screen.getByRole('button', { name: /send/i })).toBeDisabled()
+  })
+
+  it('should show user message in chat after send', async () => {
+    server.use(http.post('/api/datasets/chat', () => HttpResponse.json({ role: 'assistant', content: 'ok' })))
+    renderDialog(withChat)
+    await waitFor(() => screen.getByRole('dialog'))
+    fireEvent.change(screen.getByPlaceholderText(/ask the ai/i), { target: { value: 'describe this' } })
+    fireEvent.click(screen.getByRole('button', { name: /send/i }))
+    expect(screen.getByText('describe this')).toBeInTheDocument()
+  })
+
+  it('should show spinner while chat request is in-flight', async () => {
+    let resolve!: (v: unknown) => void
+    server.use(http.post('/api/datasets/chat', () => new Promise(r => { resolve = r })))
+    renderDialog(withChat)
+    await waitFor(() => screen.getByRole('dialog'))
+    fireEvent.change(screen.getByPlaceholderText(/ask the ai/i), { target: { value: 'hi' } })
+    fireEvent.click(screen.getByRole('button', { name: /send/i }))
+    await waitFor(() => expect(resolve).toBeDefined())
+    expect(screen.getByTestId('chat-spinner')).toBeInTheDocument()
+    resolve(HttpResponse.json({ role: 'assistant', content: 'done' }))
+  })
+
+  it('should show assistant response in chat', async () => {
+    server.use(http.post('/api/datasets/chat', () => HttpResponse.json({ role: 'assistant', content: 'Here is your answer.' })))
+    renderDialog(withChat)
+    await waitFor(() => screen.getByRole('dialog'))
+    fireEvent.change(screen.getByPlaceholderText(/ask the ai/i), { target: { value: 'hi' } })
+    fireEvent.click(screen.getByRole('button', { name: /send/i }))
+    await waitFor(() => expect(screen.getByText('Here is your answer.')).toBeInTheDocument())
+  })
+
+  it('should update sql textarea when response contains sql_update', async () => {
+    server.use(http.post('/api/datasets/chat', () => HttpResponse.json({ role: 'assistant', content: 'Updated.', sql_update: 'SELECT 2' })))
+    renderDialog(withChat)
+    await waitFor(() => screen.getByRole('dialog'))
+    fireEvent.change(screen.getByPlaceholderText(/ask the ai/i), { target: { value: 'fix sql' } })
+    fireEvent.click(screen.getByRole('button', { name: /send/i }))
+    await waitFor(() => expect(screen.getByPlaceholderText(/sql/i)).toHaveValue('SELECT 2'))
+  })
+
+  it('should update name field when response contains name_update', async () => {
+    server.use(http.post('/api/datasets/chat', () => HttpResponse.json({ role: 'assistant', content: 'Updated.', name_update: 'New Name' })))
+    renderDialog(withChat)
+    await waitFor(() => screen.getByRole('dialog'))
+    fireEvent.change(screen.getByPlaceholderText(/ask the ai/i), { target: { value: 'name it' } })
+    fireEvent.click(screen.getByRole('button', { name: /send/i }))
+    await waitFor(() => expect(screen.getByPlaceholderText(/name/i)).toHaveValue('New Name'))
+  })
+
+  it('should update description when response contains description_update', async () => {
+    server.use(http.post('/api/datasets/chat', () => HttpResponse.json({ role: 'assistant', content: 'Updated.', description_update: 'New desc' })))
+    renderDialog(withChat)
+    await waitFor(() => screen.getByRole('dialog'))
+    fireEvent.change(screen.getByPlaceholderText(/ask the ai/i), { target: { value: 'describe' } })
+    fireEvent.click(screen.getByRole('button', { name: /send/i }))
+    await waitFor(() => expect(screen.getByPlaceholderText(/description/i)).toHaveValue('New desc'))
+  })
+
+  it('should call POST /datasets/chat when dialog has no id', async () => {
+    let hit = ''
+    server.use(http.post('/api/datasets/:path', ({ params }) => {
+      hit = params.path as string
+      return HttpResponse.json({ role: 'assistant', content: 'ok' })
+    }))
+    renderDialog(withChat)
+    await waitFor(() => screen.getByRole('dialog'))
+    fireEvent.change(screen.getByPlaceholderText(/ask the ai/i), { target: { value: 'hi' } })
+    fireEvent.click(screen.getByRole('button', { name: /send/i }))
+    await waitFor(() => expect(hit).toBe('chat'))
+  })
+
+  it('should call POST /datasets/{id}/chat when dataset is saved', async () => {
+    let hit = ''
+    server.use(http.post('/api/datasets/:id/chat', ({ params }) => {
+      hit = params.id as string
+      return HttpResponse.json({ role: 'assistant', content: 'ok' })
+    }))
+    renderDialog(withChatSaved)
+    await waitFor(() => screen.getByRole('dialog'))
+    fireEvent.change(screen.getByPlaceholderText(/ask the ai/i), { target: { value: 'hi' } })
+    fireEvent.click(screen.getByRole('button', { name: /send/i }))
+    await waitFor(() => expect(hit).toBe('ds-1'))
+  })
+
+  it('should pre-fill chat history from initialValues.messages', async () => {
+    renderDialog({
+      initialValues: {
+        ...withChat.initialValues,
+        messages: [
+          { role: 'user', content: 'hello from explore' },
+          { role: 'assistant', content: 'I can help with that.' },
+        ],
+      },
+    })
+    await waitFor(() => screen.getByRole('dialog'))
+    expect(screen.getByText('hello from explore')).toBeInTheDocument()
+    expect(screen.getByText('I can help with that.')).toBeInTheDocument()
   })
 })
