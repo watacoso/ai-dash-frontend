@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react'
 import { ChartRow, apiListCharts, apiDeleteChart } from '../api/charts'
 import { apiListDatasets, DatasetRow } from '../api/datasets'
+import { ChartDialog, ChartInitialValues } from '../components/ChartDialog'
 
 export function ChartsPage() {
   const [charts, setCharts] = useState<ChartRow[]>([])
   const [datasets, setDatasets] = useState<DatasetRow[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [editingChart, setEditingChart] = useState<ChartInitialValues | null>(null)
 
   useEffect(() => {
     Promise.all([apiListCharts(), apiListDatasets()])
@@ -24,11 +27,37 @@ export function ChartsPage() {
     setCharts(prev => prev.filter(c => c.id !== id))
   }
 
+  function handleOpen(chart: ChartRow) {
+    const accepted = chart.versions.find(v => v.accepted)
+    setEditingChart({
+      id: chart.id,
+      name: chart.name,
+      datasource_id: chart.datasource_id,
+      d3_code: accepted?.d3_code ?? chart.versions[chart.versions.length - 1]?.d3_code ?? '',
+      versions: chart.versions,
+    })
+    setDialogOpen(true)
+  }
+
+  function handleSaved(chart: ChartRow) {
+    setCharts(prev => {
+      const idx = prev.findIndex(c => c.id === chart.id)
+      if (idx >= 0) {
+        const next = [...prev]
+        next[idx] = chart
+        return next
+      }
+      return [...prev, chart]
+    })
+    setDialogOpen(false)
+    setEditingChart(null)
+  }
+
   return (
     <main>
       <div className="page-header">
         <h1>Charts</h1>
-        <button className="btn-primary">New chart</button>
+        <button className="btn-primary" onClick={() => { setEditingChart(null); setDialogOpen(true) }}>New chart</button>
       </div>
 
       {loading && <p>Loading…</p>}
@@ -56,7 +85,7 @@ export function ChartsPage() {
                 <td>{new Date(chart.created_at).toLocaleString()}</td>
                 <td>
                   <div className="table-actions">
-                    <button className="btn-secondary">Open</button>
+                    <button className="btn-secondary" onClick={() => handleOpen(chart)}>Open</button>
                     <button className="btn-danger" onClick={() => handleDelete(chart.id)}>Delete</button>
                   </div>
                 </td>
@@ -65,6 +94,13 @@ export function ChartsPage() {
           </tbody>
         </table>
       )}
+
+      <ChartDialog
+        open={dialogOpen}
+        onClose={() => { setDialogOpen(false); setEditingChart(null) }}
+        onSaved={handleSaved}
+        initialValues={editingChart ?? undefined}
+      />
     </main>
   )
 }
