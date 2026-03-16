@@ -17,6 +17,7 @@ interface Props {
   connectionId: string
   logs?: LogEntry[]
   onClearLogs?: () => void
+  onCreateDataset?: (sql: string) => void
 }
 
 function buildExportText(messages: Message[], logs: LogEntry[]): string {
@@ -30,7 +31,15 @@ function buildExportText(messages: Message[], logs: LogEntry[]): string {
   return chat + logSection
 }
 
-export function ExploreChat({ messages, loading, onSend, connectionId, logs = [], onClearLogs }: Props) {
+function extractSql(content: string): string | null {
+  const tagged = content.match(/```sql\s*\n([\s\S]*?)```/)
+  if (tagged) return tagged[1].trim()
+  const untagged = [...content.matchAll(/```\s*\n([\s\S]*?)```/g)]
+  if (untagged.length === 1) return untagged[0][1].trim()
+  return null
+}
+
+export function ExploreChat({ messages, loading, onSend, connectionId, logs = [], onClearLogs, onCreateDataset }: Props) {
   const bottomRef = useRef<HTMLDivElement>(null)
   const [copied, setCopied] = useState(false)
   const [debugOpen, setDebugOpen] = useState(false)
@@ -49,15 +58,23 @@ export function ExploreChat({ messages, loading, onSend, connectionId, logs = []
     <div className="chat-wrap">
       <div className="chat">
         <div className="chat-messages">
-          {messages.map((msg, i) => (
-            <div key={i} className="chat-bubble" data-role={msg.role}>
-              {msg.role === 'assistant' ? (
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
-              ) : (
-                msg.content
-              )}
-            </div>
-          ))}
+          {messages.map((msg, i) => {
+            const sql = msg.role === 'assistant' && onCreateDataset ? extractSql(msg.content) : null
+            return (
+              <div key={i} className="chat-bubble" data-role={msg.role}>
+                {msg.role === 'assistant' ? (
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
+                ) : (
+                  msg.content
+                )}
+                {sql && (
+                  <button className="btn-secondary btn-create-dataset" onClick={() => onCreateDataset!(sql)}>
+                    Create dataset
+                  </button>
+                )}
+              </div>
+            )
+          })}
           {loading && <div className="chat-thinking">Thinking…</div>}
           <div ref={bottomRef} />
         </div>

@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ConnectionRow, apiListConnections } from '../api/connections'
 import { ChatMessage, LogEntry, apiExploreChat } from '../api/explore'
+import { DatasetRow } from '../api/datasets'
+import { DatasetDialog, DatasetInitialValues } from '../components/DatasetDialog'
 import { ExploreChat } from '../components/ExploreChat'
 import { useSession } from '../context/SessionContext'
 
@@ -14,6 +16,9 @@ export function ExplorePage() {
   const [logs, setLogs] = useState<LogEntry[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [datasetDialog, setDatasetDialog] = useState<DatasetInitialValues | null>(null)
+  const [toast, setToast] = useState<{ name: string } | null>(null)
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     apiListConnections().then(setConnections)
@@ -52,6 +57,24 @@ export function ExplorePage() {
     }
   }
 
+  function handleCreateDataset(sql: string) {
+    setDatasetDialog({
+      name: '',
+      description: '',
+      sql,
+      snowflake_connection_id: snowflakeId ?? '',
+      claude_connection_id: claudeId ?? null,
+      models_used: [],
+    })
+  }
+
+  function handleDatasetSaved(dataset: DatasetRow) {
+    setDatasetDialog(null)
+    setToast({ name: dataset.name })
+    if (toastTimer.current) clearTimeout(toastTimer.current)
+    toastTimer.current = setTimeout(() => setToast(null), 5000)
+  }
+
   if (started) {
     return (
       <main>
@@ -64,7 +87,23 @@ export function ExplorePage() {
           onSend={handleSend}
           connectionId={snowflakeId!}
           onClearLogs={() => setLogs([])}
+          onCreateDataset={handleCreateDataset}
         />
+        {datasetDialog && (
+          <DatasetDialog
+            open={true}
+            onClose={() => setDatasetDialog(null)}
+            onSaved={handleDatasetSaved}
+            initialValues={datasetDialog}
+          />
+        )}
+        {toast && (
+          <div className="explore-toast" role="status">
+            Dataset '{toast.name}' saved
+            {' '}
+            <a href="/datasets">View</a>
+          </div>
+        )}
       </main>
     )
   }
