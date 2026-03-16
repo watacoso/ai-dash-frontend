@@ -70,9 +70,11 @@ export function SettingsPage() {
                   <td>{conn.name}</td>
                   <td>{conn.type}</td>
                   <td>
-                    <button className="btn-secondary" onClick={() => handleTest(conn.id)}>Test</button>
-                    <button className="btn-secondary" onClick={() => setEditing(conn)}>Edit</button>
-                    <button className="btn-danger" onClick={() => handleDelete(conn.id)}>Delete</button>
+                    <div className="table-actions">
+                      <button className="btn-secondary" onClick={() => handleTest(conn.id)}>Test</button>
+                      <button className="btn-secondary" onClick={() => setEditing(conn)}>Edit</button>
+                      <button className="btn-danger" onClick={() => handleDelete(conn.id)}>Delete</button>
+                    </div>
                   </td>
                   <td>
                     {testResult === 'pending' && (
