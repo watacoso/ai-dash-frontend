@@ -167,4 +167,38 @@ describe('ChartDialog', () => {
     // Assert — iframe (live preview) present
     expect(document.querySelector('iframe')).toBeInTheDocument()
   })
+
+  it('should render version history panel in dialog', async () => {
+    // Arrange
+    renderDialog({
+      initialValues: {
+        id: 'ch-1', name: 'My chart', datasource_id: 'ds-1', d3_code: '', versions: [
+          { version: 0, d3_code: "d3.select('svg');", accepted: false, created_at: '2026-03-16T10:00:00Z' },
+        ],
+      },
+    })
+    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument())
+    // Assert
+    expect(screen.getByText(/v0/i)).toBeInTheDocument()
+  })
+
+  it('should call PATCH /api/charts/{id} with accepted_version when Accept clicked', async () => {
+    let patchBody: unknown = null
+    server.use(
+      http.patch('/api/charts/ch-1', async ({ request }) => {
+        patchBody = await request.json()
+        return HttpResponse.json({ id: 'ch-1', name: 'My chart', datasource_id: 'ds-1', versions: [{ version: 0, d3_code: "d3.select('svg');", accepted: true, created_at: '2026-03-16T10:00:00Z' }], created_by: 'u1', created_at: '2026-03-16T10:00:00Z', updated_at: '2026-03-16T10:00:00Z' })
+      })
+    )
+    renderDialog({
+      initialValues: {
+        id: 'ch-1', name: 'My chart', datasource_id: 'ds-1', d3_code: '', versions: [
+          { version: 0, d3_code: "d3.select('svg');", accepted: false, created_at: '2026-03-16T10:00:00Z' },
+        ],
+      },
+    })
+    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument())
+    fireEvent.click(screen.getByRole('button', { name: /accept/i }))
+    await waitFor(() => expect(patchBody).toEqual({ accepted_version: 0 }))
+  })
 })
