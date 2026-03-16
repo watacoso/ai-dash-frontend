@@ -5,6 +5,7 @@ import { ConnectionRow, apiListConnections } from '../api/connections'
 import { ChartRow } from '../api/charts'
 import { DatasetRow, apiListDatasets } from '../api/datasets'
 import { D3Preview } from './D3Preview'
+import { ChartVersionHistory } from './ChartVersionHistory'
 
 interface ChatMsg { role: string; content: string }
 
@@ -40,6 +41,7 @@ export function ChartDialog({ open, onClose, onSaved, initialValues }: Props) {
   const [name, setName] = useState(initialValues?.name ?? '')
   const [datasourceId, setDatasourceId] = useState(initialValues?.datasource_id ?? '')
   const [d3Code, setD3Code] = useState(initialValues?.d3_code ?? '')
+  const [versions, setVersions] = useState<ChartRow['versions']>(initialValues?.versions ?? [])
   const [saving, setSaving] = useState(false)
 
   const [chatMessages, setChatMessages] = useState<ChatMsg[]>(initialValues?.messages ?? [])
@@ -61,6 +63,7 @@ export function ChartDialog({ open, onClose, onSaved, initialValues }: Props) {
     setName(initialValues?.name ?? '')
     setDatasourceId(initialValues?.datasource_id ?? '')
     setD3Code(initialValues?.d3_code ?? '')
+    setVersions(initialValues?.versions ?? [])
     setChatMessages(initialValues?.messages ?? [])
   }, [initialValues])
 
@@ -84,6 +87,15 @@ export function ChartDialog({ open, onClose, onSaved, initialValues }: Props) {
     } finally {
       setSaving(false)
     }
+  }
+
+  async function handleAcceptVersion(idx: number) {
+    if (!initialValues?.id) return
+    const result = await authFetch(`/api/charts/${initialValues.id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ accepted_version: idx }),
+    })
+    setVersions(result.versions)
   }
 
   async function handleChatSend() {
@@ -158,6 +170,11 @@ export function ChartDialog({ open, onClose, onSaved, initialValues }: Props) {
               onChange={e => setD3Code(e.target.value)}
             />
             <D3Preview d3Code={d3Code} />
+            <ChartVersionHistory
+              versions={versions}
+              onAccept={handleAcceptVersion}
+              onPreview={setD3Code}
+            />
           </div>
 
           <div className="chart-dialog-right">
