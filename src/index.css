@@ -96,6 +96,37 @@ button[type="button"]:not(.btn-primary):hover:not(:disabled) {
   background: var(--color-bg);
 }
 
+/* Explicit button variants */
+.btn-primary {
+  background: var(--color-accent);
+  color: var(--color-surface);
+  border-color: var(--color-accent);
+}
+.btn-primary:hover:not(:disabled) { background: var(--color-accent-dim); border-color: var(--color-accent-dim); }
+
+.btn-secondary {
+  background: transparent;
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+.btn-secondary:hover:not(:disabled) { background: var(--color-bg); }
+
+.btn-danger {
+  background: var(--color-error);
+  color: var(--color-surface);
+  border-color: var(--color-error);
+}
+.btn-danger:hover:not(:disabled) { opacity: .85; }
+
+/* Input error state */
+.input-error {
+  border-color: var(--color-error);
+}
+.input-error:focus {
+  border-color: var(--color-error);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-error) 20%, transparent);
+}
+
 /* ── Form elements ──────────────────────────────────────────────────────────── */
 
 label {

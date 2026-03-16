@@ -24,7 +24,7 @@ function HomePage() {
   return (
     <>
       <h1>AI-Dash</h1>
-      <button onClick={logout}>Log out</button>
+      <button className="btn-secondary" onClick={logout}>Log out</button>
     </>
   )
 }

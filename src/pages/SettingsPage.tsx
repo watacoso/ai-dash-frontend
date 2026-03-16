@@ -49,7 +49,7 @@ export function SettingsPage() {
   return (
     <main>
       <h1>Connections</h1>
-      <button onClick={() => setShowForm(true)}>Add connection</button>
+      <button className="btn-primary" onClick={() => setShowForm(true)}>Add connection</button>
 
       {connections.length === 0 ? (
         <p>No connections configured.</p>
@@ -68,9 +68,9 @@ export function SettingsPage() {
                   <td>{conn.name}</td>
                   <td>{conn.type}</td>
                   <td>
-                    <button onClick={() => handleTest(conn.id)}>Test</button>
-                    <button onClick={() => setEditing(conn)}>Edit</button>
-                    <button onClick={() => handleDelete(conn.id)}>Delete</button>
+                    <button className="btn-secondary" onClick={() => handleTest(conn.id)}>Test</button>
+                    <button className="btn-secondary" onClick={() => setEditing(conn)}>Edit</button>
+                    <button className="btn-danger" onClick={() => handleDelete(conn.id)}>Delete</button>
                   </td>
                   <td>
                     {testResult === 'pending' && (

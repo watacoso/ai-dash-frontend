@@ -227,10 +227,10 @@ export function DatasetDialog({ open, onClose, onSaved, initialValues }: Props) 
             </select>
           </div>
           <div className="dataset-dialog-header-actions">
-            <button onClick={handleSave} disabled={!canSave || saving}>
+            <button className="btn-primary" onClick={handleSave} disabled={!canSave || saving}>
               {saving ? 'Saving…' : 'Save'}
             </button>
-            <button aria-label="Close" onClick={onClose}>×</button>
+            <button className="btn-secondary" aria-label="Close" onClick={onClose}>×</button>
           </div>
         </div>
 
@@ -245,8 +245,8 @@ export function DatasetDialog({ open, onClose, onSaved, initialValues }: Props) 
             />
             <div className={`dataset-dialog-run-panel${resultsOpen ? ' is-open' : ''}`}>
               <div className="dataset-dialog-run-bar">
-                <button onClick={handleRun} disabled={!canRun || running}>Run</button>
-                {running && <button onClick={handleCancel}>Cancel</button>}
+                <button className="btn-primary" onClick={handleRun} disabled={!canRun || running}>Run</button>
+                {running && <button className="btn-secondary" onClick={handleCancel}>Cancel</button>}
                 <button
                   className="run-toggle-btn"
                   aria-label={resultsOpen ? 'Collapse results' : 'Expand results'}
@@ -305,7 +305,7 @@ export function DatasetDialog({ open, onClose, onSaved, initialValues }: Props) 
                   onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleChatSend() } }}
                   disabled={chatLoading}
                 />
-                <button onClick={handleChatSend} disabled={!chatInput.trim() || chatLoading}>
+                <button className="btn-primary" onClick={handleChatSend} disabled={!chatInput.trim() || chatLoading}>
                   Send
                 </button>
               </div>

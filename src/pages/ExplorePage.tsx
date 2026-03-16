@@ -152,7 +152,7 @@ export function ExplorePage() {
           )}
         </div>
 
-        <button onClick={handleStart} disabled={!canStart}>
+        <button className="btn-primary" onClick={handleStart} disabled={!canStart}>
           Start session
         </button>
       </div>

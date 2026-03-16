@@ -34,6 +34,12 @@ describe('UserTable', () => {
     expect(onDeactivate).toHaveBeenCalledWith('u1')
   })
 
+  it('should render Deactivate button with btn-danger class', () => {
+    render(<UserTable users={users} currentUserId="other" onRoleChange={() => {}} onDeactivate={() => {}} />)
+    const buttons = screen.getAllByRole('button', { name: /deactivate/i })
+    expect(buttons[0]).toHaveClass('btn-danger')
+  })
+
   it('hides deactivate button for current user row', () => {
     render(<UserTable users={users} currentUserId="u1" onRoleChange={() => {}} onDeactivate={() => {}} />)
     const buttons = screen.queryAllByRole('button', { name: /deactivate/i })

@@ -42,7 +42,7 @@ export function UserTable({ users, currentUserId, onRoleChange, onDeactivate }: 
             <td>{u.is_active ? 'active' : 'inactive'}</td>
             <td>
               {u.id !== currentUserId && (
-                <button onClick={() => onDeactivate(u.id)}>Deactivate</button>
+                <button className="btn-danger" onClick={() => onDeactivate(u.id)}>Deactivate</button>
               )}
             </td>
           </tr>

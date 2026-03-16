@@ -130,8 +130,8 @@ export function ConnectionForm({ initial, onSuccess, onCancel }: Props) {
         </>
       )}
 
-      <button type="submit" disabled={!canSave || saving}>Save</button>
-      <button type="button" onClick={onCancel}>Cancel</button>
+      <button type="submit" className="btn-primary" disabled={!canSave || saving}>Save</button>
+      <button type="button" className="btn-secondary" onClick={onCancel}>Cancel</button>
     </form>
   )
 }

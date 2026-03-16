@@ -48,7 +48,7 @@ export function DatasetsPage() {
     <main>
       <div className="datasets-header">
         <h1>Datasets</h1>
-        <button onClick={() => { setEditingDataset(null); setDialogOpen(true) }}>Add dataset</button>
+        <button className="btn-primary" onClick={() => { setEditingDataset(null); setDialogOpen(true) }}>Add dataset</button>
       </div>
 
       {loading && <p>Loading…</p>}
@@ -75,8 +75,8 @@ export function DatasetsPage() {
                 <td>{ds.description}</td>
                 <td>{new Date(ds.created_at).toLocaleString()}</td>
                 <td className="datasets-actions">
-                  <button onClick={() => handleOpen(ds)}>Open</button>
-                  <button onClick={() => handleDelete(ds.id)}>Delete</button>
+                  <button className="btn-secondary" onClick={() => handleOpen(ds)}>Open</button>
+                  <button className="btn-danger" onClick={() => handleDelete(ds.id)}>Delete</button>
                 </td>
               </tr>
             ))}

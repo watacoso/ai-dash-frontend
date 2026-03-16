@@ -26,7 +26,7 @@ export function AdminPage() {
   return (
     <main>
       <h1>Admin</h1>
-      <button onClick={() => setShowInvite(true)}>Invite user</button>
+      <button className="btn-primary" onClick={() => setShowInvite(true)}>Invite user</button>
       <UserTable
         users={users}
         currentUserId={user?.id ?? ''}
