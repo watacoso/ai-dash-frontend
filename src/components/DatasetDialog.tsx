@@ -55,6 +55,7 @@ export function DatasetDialog({ open, onClose, onSaved, initialValues }: Props) 
   const [running, setRunning] = useState(false)
   const [runResult, setRunResult] = useState<RunResult | null>(null)
   const [runError, setRunError] = useState<string | null>(null)
+  const [resultsOpen, setResultsOpen] = useState(false)
   const cancelledRef = useRef(false)
 
   const modelsUsed = initialValues?.models_used ?? []
@@ -89,6 +90,7 @@ export function DatasetDialog({ open, onClose, onSaved, initialValues }: Props) 
     setRunResult(null)
     setRunError(null)
     setRunning(true)
+    setResultsOpen(true)
     cancelledRef.current = false
     const url = initialValues?.id
       ? `/api/datasets/${initialValues.id}/run`
@@ -192,31 +194,42 @@ export function DatasetDialog({ open, onClose, onSaved, initialValues }: Props) 
               value={sql}
               onChange={e => setSql(e.target.value)}
             />
-            <div className="dataset-dialog-run-panel">
+            <div className={`dataset-dialog-run-panel${resultsOpen ? ' is-open' : ''}`}>
               <div className="dataset-dialog-run-bar">
                 <button onClick={handleRun} disabled={!canRun || running}>Run</button>
                 {running && <button onClick={handleCancel}>Cancel</button>}
+                <button
+                  className="run-toggle-btn"
+                  aria-label={resultsOpen ? 'Collapse results' : 'Expand results'}
+                  onClick={() => setResultsOpen(o => !o)}
+                >
+                  {resultsOpen ? '▼' : '▲'}
+                </button>
               </div>
-              {running && <div role="status" className="run-spinner">Loading…</div>}
-              {runError && <p data-testid="run-error" className="run-error">{runError}</p>}
-              {runResult && (
-                <div className="run-results">
-                  <div data-testid="run-metadata" className="run-metadata">
-                    {runResult.row_count} rows · {runResult.duration_ms}ms · {runResult.executed_at}
-                  </div>
-                  <div className="run-results-scroll">
-                    <table>
-                      <thead>
-                        <tr>{runResult.columns.map(col => <th key={col}>{col}</th>)}</tr>
-                      </thead>
-                      <tbody>
-                        {runResult.rows.map((row, i) => (
-                          <tr key={i}>{row.map((cell, j) => <td key={j}>{String(cell)}</td>)}</tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
+              {resultsOpen && (
+                <>
+                  {running && <div role="status" className="run-spinner">Loading…</div>}
+                  {runError && <p data-testid="run-error" className="run-error">{runError}</p>}
+                  {runResult && (
+                    <div className="run-results">
+                      <div data-testid="run-metadata" className="run-metadata">
+                        {runResult.row_count} rows · {runResult.duration_ms}ms · {runResult.executed_at}
+                      </div>
+                      <div className="run-results-scroll">
+                        <table>
+                          <thead>
+                            <tr>{runResult.columns.map(col => <th key={col}>{col}</th>)}</tr>
+                          </thead>
+                          <tbody>
+                            {runResult.rows.map((row, i) => (
+                              <tr key={i}>{row.map((cell, j) => <td key={j}>{String(cell)}</td>)}</tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>
