@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
+import { DatasetDialog } from '../components/DatasetDialog'
 import { DatasetRow, apiDeleteDataset, apiListDatasets } from '../api/datasets'
 
 export function DatasetsPage() {
   const [datasets, setDatasets] = useState<DatasetRow[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [dialogOpen, setDialogOpen] = useState(false)
 
   useEffect(() => {
     apiListDatasets()
@@ -22,7 +24,7 @@ export function DatasetsPage() {
     <main>
       <div className="datasets-header">
         <h1>Datasets</h1>
-        <button>Add dataset</button>
+        <button onClick={() => setDialogOpen(true)}>Add dataset</button>
       </div>
 
       {loading && <p>Loading…</p>}
@@ -57,6 +59,15 @@ export function DatasetsPage() {
           </tbody>
         </table>
       )}
+
+      <DatasetDialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        onSaved={(ds) => {
+          setDatasets(prev => [...prev, ds])
+          setDialogOpen(false)
+        }}
+      />
     </main>
   )
 }
