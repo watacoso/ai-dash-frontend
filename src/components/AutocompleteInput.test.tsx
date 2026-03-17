@@ -256,6 +256,60 @@ describe('AutocompleteInput', () => {
     expect(options[0]).not.toHaveClass('autocomplete-option--active')
   })
 
+  it('should replace partial prefix after data: without duplication (Tab)', async () => {
+    // Arrange — user has typed a partial name after data:
+    mockApiGetSchema.mockResolvedValue(['PRODUCTION', 'PRODUCTS'])
+    render(<AutocompleteInput connectionId="sf-1" loading={false} onSend={vi.fn()} />)
+    const input = screen.getByRole('textbox')
+    fireEvent.change(input, { target: { value: 'data:PRO' } })
+    await advanceDebounce()
+    expect(screen.getByRole('listbox')).toBeInTheDocument()
+    // Act
+    fireEvent.keyDown(input, { key: 'Tab' })
+    // Assert — PRO must NOT appear twice
+    expect(input).toHaveValue('data:PRODUCTION')
+  })
+
+  it('should replace partial prefix after data: without duplication (Enter)', async () => {
+    mockApiGetSchema.mockResolvedValue(['PRODUCTION'])
+    render(<AutocompleteInput connectionId="sf-1" loading={false} onSend={vi.fn()} />)
+    const input = screen.getByRole('textbox')
+    fireEvent.change(input, { target: { value: 'data:PRO' } })
+    await advanceDebounce()
+    fireEvent.keyDown(input, { key: 'Enter' })
+    expect(input).toHaveValue('data:PRODUCTION')
+  })
+
+  it('should replace partial prefix after data: without duplication (mouse click)', async () => {
+    mockApiGetSchema.mockResolvedValue(['PRODUCTION'])
+    render(<AutocompleteInput connectionId="sf-1" loading={false} onSend={vi.fn()} />)
+    const input = screen.getByRole('textbox')
+    fireEvent.change(input, { target: { value: 'data:PRO' } })
+    await advanceDebounce()
+    fireEvent.mouseDown(screen.getAllByRole('option')[0])
+    expect(input).toHaveValue('data:PRODUCTION')
+  })
+
+  it('should replace partial after dot without duplication', async () => {
+    mockApiGetSchema.mockResolvedValue(['PRODUCTION'])
+    render(<AutocompleteInput connectionId="sf-1" loading={false} onSend={vi.fn()} />)
+    const input = screen.getByRole('textbox')
+    fireEvent.change(input, { target: { value: 'DB_A.PUB.PRO' } })
+    await advanceDebounce()
+    fireEvent.keyDown(input, { key: 'Tab' })
+    expect(input).toHaveValue('DB_A.PUB.PRODUCTION')
+  })
+
+  it('should replace partial inline (sentence prefix) without duplication', async () => {
+    mockApiGetSchema.mockResolvedValue(['PRODUCTION'])
+    render(<AutocompleteInput connectionId="sf-1" loading={false} onSend={vi.fn()} />)
+    const input = screen.getByRole('textbox')
+    fireEvent.change(input, { target: { value: 'show me data:PRO' } })
+    await advanceDebounce()
+    fireEvent.keyDown(input, { key: 'Tab' })
+    expect(input).toHaveValue('show me data:PRODUCTION')
+  })
+
   it('should insert arrow-selected suggestion on Enter', async () => {
     // Arrange
     mockApiGetSchema.mockResolvedValue(['DB1', 'DB2', 'DB3'])

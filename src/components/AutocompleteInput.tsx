@@ -64,8 +64,9 @@ function insertSuggestion(input: string, suggestion: string): string {
   if (dotIdx !== -1) {
     words[words.length - 1] = lastWord.slice(0, dotIdx + 1) + suggestion
   } else {
-    // lastWord is `data:` with no dot yet — append the suggestion directly
-    words[words.length - 1] = lastWord + suggestion
+    // lastWord is `data:PREFIX` with no dot — replace everything after the colon
+    const colonIdx = lastWord.indexOf(':')
+    words[words.length - 1] = lastWord.slice(0, colonIdx + 1) + suggestion
   }
   return words.join(' ')
 }
